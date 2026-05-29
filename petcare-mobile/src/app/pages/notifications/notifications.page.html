@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Novedades</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="markAllAsRead()">
+        Marcar todo como leído
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Novedades</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  @if (isLoading) {
+    <div class="spinner-container">
+      <ion-spinner></ion-spinner>
+    </div>
+  } @else {
+    @if (groupedNotifications.length > 0) {
+      <div class="notification-feed">
+        @for (group of groupedNotifications; track group.dateLabel) {
+          <div class="date-group">
+            <h3 class="date-header">{{ group.dateLabel }}</h3>
+            <ion-list class="notification-list" lines="none">
+              @for (notif of group.notifications; track notif._id) {
+                <ion-item-sliding>
+                  <ion-item class="notification-item" [button]="true" (click)="handleNotificationClick(notif)" detail="false">
+                    <div class="item-icon" [class.unread]="!notif.leida">
+                      <ion-icon [name]="getIconForNotification(notif.titulo)" color="primary"></ion-icon>
+                    </div>
+                    <ion-label>
+                      <h2>{{ notif.titulo }}</h2>
+                      <p>{{ notif.cuerpo }}</p>
+                      <p class="date">{{ notif.createdAt | date:'shortTime' }}</p>
+                    </ion-label>
+                  </ion-item>
+                  
+                  <ion-item-options side="end">
+                    <ion-item-option color="danger" (click)="onDelete(notif._id, $event)">
+                      <ion-icon slot="icon-only" name="trash"></ion-icon>
+                    </ion-item-option>
+                  </ion-item-options>
+                </ion-item-sliding>
+              }
+            </ion-list>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <ion-icon name="notifications-off-outline"></ion-icon>
+        <h2>No hay novedades</h2>
+        <p>Cuando haya una actualización sobre tus solicitudes o eventos, aparecerá aquí.</p>
+      </div>
+    }
+  }
+</ion-content>

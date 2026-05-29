@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/events"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ evento?.titulo || 'Evento' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (isLoading) {
+    <div class="spinner-container"><ion-spinner></ion-spinner></div>
+  } @else if (evento) {
+    <img [src]="evento.imagenPrincipal" alt="Imagen de {{ evento.titulo }}" class="header-image"/>
+
+    <div class="ion-padding">
+      <ion-chip color="secondary">{{ evento.organizador.nombre }}</ion-chip>
+      <h1>{{ evento.titulo }}</h1>
+      
+      <ion-list lines="none" class="info-list">
+        <ion-item>
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ evento.fecha | date:'fullDate' }}</h3>
+            <p>{{ evento.hora }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="location-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>{{ evento.ubicacion }}</h3>
+            <p>Ubicación del evento</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <h2>Acerca del evento</h2>
+      <p class="description">{{ evento.descripcion }}</p>
+    </div>
+
+    <ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button (click)="toggleInteres()" expand="block" shape="round" class="action-button" [fill]="estoyInteresado ? 'solid' : 'outline'">
+      <ion-icon [name]="estoyInteresado ? 'star' : 'star-outline'" slot="start"></ion-icon>
+      {{ estoyInteresado ? 'Estoy Interesado' : 'Me Interesa' }}
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
+  }
+</ion-content>

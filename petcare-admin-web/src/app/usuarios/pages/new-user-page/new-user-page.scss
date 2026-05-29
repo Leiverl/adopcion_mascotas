@@ -1,0 +1,45 @@
+.pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+
+  .form-field {
+    flex: 1;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+.current-photos {
+  margin-top: 16px;
+  p {
+    font-weight: 500;
+  }
+}
+
+.photo-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
+}
+
+.file-name {
+    font-style: italic;
+    color: #666;
+}

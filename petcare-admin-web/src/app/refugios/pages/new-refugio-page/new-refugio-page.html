@@ -1,0 +1,63 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      {{ isEditMode ? 'Editar Refugio' : 'Crear Nuevo Refugio' }}
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="refugioForm" (ngSubmit)="onSubmit()">
+      
+      <div class="logo-section">
+        <img [src]="logoPreview || 'https://via.placeholder.com/150'" alt="Logo del refugio" class="logo-preview">
+        <button mat-stroked-button type="button" (click)="fileInput.click()">
+          <mat-icon>upload</mat-icon>
+          {{ isEditMode ? 'Cambiar Logo' : 'Seleccionar Logo' }}
+        </button>
+        <input hidden type="file" #fileInput (change)="onFileSelected($event)" accept="image/*">
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre del Refugio</mat-label>
+        <input matInput formControlName="nombre">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion">
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Información de Contacto</mat-label>
+        <input matInput formControlName="infoContacto" placeholder="Ej: Teléfono, email, redes sociales">
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Historia del Refugio</mat-label>
+        <textarea matInput formControlName="historia" rows="5"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Usuario Propietario</mat-label>
+  <mat-select formControlName="propietario">
+    @if (availableOwners.length === 0 && !isEditMode) {
+      <mat-option disabled>No hay usuarios REFUGIO disponibles</mat-option>
+    }
+    @for (owner of availableOwners; track owner._id) {
+      <mat-option [value]="owner._id">{{ owner.nombre }} ({{ owner.correo }})</mat-option>
+    }
+  </mat-select>
+</mat-form-field>
+
+      <div class="actions">
+        @if(isLoading) {
+          <mat-spinner diameter="35"></mat-spinner>
+        } @else {
+          <button mat-stroked-button type="button" routerLink="/refugios/list">Cancelar</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="refugioForm.invalid">
+            {{ isEditMode ? 'Actualizar Refugio' : 'Guardar Refugio' }}
+          </button>
+        }
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

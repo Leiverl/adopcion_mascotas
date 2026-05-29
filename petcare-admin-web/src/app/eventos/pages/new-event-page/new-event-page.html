@@ -1,0 +1,69 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{ isEditMode ? 'Editar Evento' : 'Crear Nuevo Evento' }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="event-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Título del Evento</mat-label>
+        <input matInput formControlName="titulo">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="4"></textarea>
+      </mat-form-field>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Fecha del Evento</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="fecha">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Hora</mat-label>
+          <input matInput formControlName="hora" placeholder="Ej: 10:00 AM">
+        </mat-form-field>
+      </div>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Ubicación</mat-label>
+        <input matInput formControlName="ubicacion">
+      </mat-form-field>
+      
+      @if (esAdmin) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Asignar a Refugio</mat-label>
+          <mat-select formControlName="organizador">
+            @for (refugio of listaRefugios; track refugio) {
+              <mat-option [value]="refugio._id">{{ refugio.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <div class="file-upload-section">
+        <label class="mat-body-strong">Imagen Principal del Evento</label>
+        <p class="mat-body-2" *ngIf="isEditMode">Sube una nueva imagen solo si deseas reemplazar la actual.</p>
+        <input type="file" (change)="onFileSelected($event)">
+
+        @if(isEditMode && imagenActual) {
+          <div class="current-photo">
+            <p>Imagen Actual:</p>
+            <img [src]="imagenActual" alt="Imagen actual del evento">
+          </div>
+        }
+      </div>
+
+      <div class="actions">
+        @if(isLoading) {
+          <mat-spinner diameter="35"></mat-spinner>
+        } @else {
+          <button mat-stroked-button type="button" routerLink="/eventos">Cancelar</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="eventForm.invalid">{{ isEditMode ? 'Actualizar Evento' : 'Crear Evento' }}</button>
+        }
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

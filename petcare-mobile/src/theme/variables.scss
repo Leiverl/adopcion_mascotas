@@ -1,0 +1,47 @@
+:root {
+  --ion-font-family: 'Poppins', sans-serif;
+
+  /** Primary (Teal Profundo) **/
+  --ion-color-primary: #008080;
+  --ion-color-primary-rgb: 0, 128, 128;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #007171;
+  --ion-color-primary-tint: #1a8d8d;
+
+  /** Secondary (Coral Vibrante) **/
+  --ion-color-secondary: #ff6b6b;
+  --ion-color-secondary-rgb: 255, 107, 107;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #e05e5e;
+  --ion-color-secondary-tint: #ff7a7a;
+
+  /** Tertiary (Dorado Cálido) **/
+  --ion-color-tertiary: #ffd700;
+  --ion-color-tertiary-rgb: 255, 215, 0;
+  --ion-color-tertiary-contrast: #000000;
+  --ion-color-tertiary-contrast-rgb: 0, 0, 0;
+  --ion-color-tertiary-shade: #e0bd00;
+  --ion-color-tertiary-tint: #ffda1a;
+  
+  --ion-color-success: #28a745;
+  --ion-color-warning: #ffc107;
+  --ion-color-danger: #dc3545;
+  --ion-color-dark: #222428;
+  --ion-color-medium: #92949c;
+  --ion-color-light: #f4f5f7;
+
+  /* --- Variables Personalizadas para el Tema --- */
+  --app-background-color: #fdfaf6; // Un beige muy claro y cálido
+  --text-color: #3D405B;
+  --subtle-text-color: #8D99AE;
+  --card-background-color: #ffffff;
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --card-radius: 20px;
+}
+
+body {
+  --ion-background-color: var(--app-background-color);
+  --ion-text-color: var(--text-color);
+}

@@ -1,0 +1,60 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Descubrir</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openFilterModal()" fill="clear">
+        <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (isLoading) {
+    <div class="spinner-container">
+      <ion-spinner></ion-spinner>
+    </div>
+  } @else {
+    @if (mascotas.length > 0) {
+      <div class="swiper-container">
+        <swiper-container #swiper [pagination]="false" effect="cards" [grabCursor]="true" class="pet-swiper">
+          @for (mascota of mascotas; track mascota._id) {
+            <swiper-slide>
+              <ion-card class="pet-card" (click)="handleAction('details')">
+                <img [src]="mascota.galeriaFotos[0]" alt="Foto de {{mascota.nombre}}"/>
+                <div class="card-overlay">
+                  <ion-card-header>
+                    <ion-card-title>{{ mascota.nombre }}</ion-card-title>
+                    <ion-card-subtitle>{{ mascota.raza }}, {{ mascota.edad }} años</ion-card-subtitle>
+                  </ion-card-header>
+                </div>
+              </ion-card>
+            </swiper-slide>
+          }
+        </swiper-container>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <ion-icon name="search-outline"></ion-icon>
+        <h2>No se encontraron mascotas</h2>
+        <p>Intenta ajustar tu búsqueda o filtros para encontrar a tu nuevo amigo.</p>
+      </div>
+    }
+  }
+</ion-content>
+
+<ion-footer *ngIf="!isLoading && mascotas.length > 0">
+  <ion-toolbar class="action-toolbar">
+    <ion-button (click)="handleAction('reject')" fill="clear" class="action-button reject">
+      <ion-icon slot="icon-only" name="close-circle"></ion-icon>
+    </ion-button>
+    
+    <ion-button (click)="handleAction('details')" fill="clear" class="action-button details">
+      <ion-icon slot="icon-only" name="information-circle"></ion-icon>
+    </ion-button>
+
+    <ion-button (click)="handleAction('favorite')" fill="clear" class="action-button favorite">
+      <ion-icon slot="icon-only" name="heart-circle"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

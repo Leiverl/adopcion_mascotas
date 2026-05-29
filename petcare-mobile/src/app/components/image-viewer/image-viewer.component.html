@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Galería</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <swiper-container [zoom]="true" [initialSlide]="initialSlide">
+    @for (image of images; track image) {
+      <swiper-slide>
+        <div class="swiper-zoom-container">
+          <img [src]="image" />
+        </div>
+      </swiper-slide>
+    }
+  </swiper-container>
+</ion-content>

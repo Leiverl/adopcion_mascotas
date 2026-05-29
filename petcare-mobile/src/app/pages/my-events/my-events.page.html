@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis Eventos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  @if (isLoading) {
+    <div class="spinner-container"><ion-spinner></ion-spinner></div>
+  } @else {
+    @if (misEventos.length > 0) {
+      <ion-list class="event-list" lines="none">
+        @for (interaccion of misEventos; track interaccion._id) {
+          <ion-item-sliding class="animate-fade-in-up">
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="onRemoveInterest(interaccion, $event)">
+                <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+                No iré
+              </ion-item-option>
+            </ion-item-options>
+            
+            <ion-item class="event-item" [routerLink]="['/tabs/events', interaccion.evento._id]" detail="false">
+              <ion-thumbnail slot="start">
+                <img [src]="interaccion.evento.imagenPrincipal" alt="Imagen de {{ interaccion.evento.titulo }}"/>
+              </ion-thumbnail>
+              <ion-label>
+                <h2>{{ interaccion.evento.titulo }}</h2>
+                <p>{{ interaccion.evento.ubicacion }}</p>
+              </ion-label>
+              <div class="countdown" slot="end">
+                <span>{{ getDaysRemaining(interaccion.evento.fecha) }}</span>
+              </div>
+            </ion-item>
+          </ion-item-sliding>
+        }
+      </ion-list>
+    } @else {
+      }
+  }
+</ion-content>

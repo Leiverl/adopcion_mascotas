@@ -1,0 +1,48 @@
+<h1>Mi Perfil de Refugio</h1>
+
+@if (isLoading) {
+  <div class="spinner-container"><mat-spinner></mat-spinner></div>
+} @else if (currentProfile) {
+  <mat-card>
+    <mat-card-content>
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <div class="profile-header">
+          <img [src]="currentProfile.logo" alt="Logo del refugio" class="profile-logo">
+          <button mat-flat-button type="button" (click)="fileInput.click()">
+            <mat-icon>upload</mat-icon>
+            Cambiar Logo
+          </button>
+          <input hidden type="file" #fileInput (change)="onFileSelected($event)">
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre del Refugio</mat-label>
+          <input matInput formControlName="nombre">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="direccion">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Información de Contacto</mat-label>
+          <input matInput formControlName="infoContacto">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nuestra Historia</mat-label>
+          <textarea matInput formControlName="historia" rows="5"></textarea>
+        </mat-form-field>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="profileForm.invalid">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+} @else {
+  <p>No se pudo cargar el perfil del refugio.</p>
+}

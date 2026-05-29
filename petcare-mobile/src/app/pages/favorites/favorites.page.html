@@ -1,0 +1,49 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Mis Favoritos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Mis Favoritos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  @if (isLoading) {
+    <div class="spinner-container">
+      <ion-spinner></ion-spinner>
+    </div>
+  } @else {
+    @if (favoritos.length > 0) {
+      <ion-list class="favorite-list" [inset]="true">
+        @for (fav of favoritos; track fav._id) {
+          <ion-item class="favorite-item animate-fade-in-up" [routerLink]="['/tabs/discover', fav.mascota._id]" detail="false">
+            <ion-thumbnail slot="start">
+              <img [src]="fav.mascota.galeriaFotos[0]" alt="Foto de {{fav.mascota.nombre}}"/>
+            </ion-thumbnail>
+            <ion-label>
+              <h2>{{ fav.mascota.nombre }}</h2>
+              <p>{{ fav.mascota.raza }}</p>
+              <p class="refugio-name">{{ fav.mascota.refugio.nombre }}</p>
+            </ion-label>
+            <ion-button fill="clear" color="danger" slot="end" (click)="onRemoveFavorite(fav, $event)">
+              <ion-icon slot="icon-only" name="heart-dislike-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        }
+      </ion-list>
+    } @else {
+      <div class="empty-state">
+        <ion-icon name="heart-outline"></ion-icon>
+        <h2>Tu lista de favoritos está vacía</h2>
+        <p>Toca el corazón en el perfil de una mascota para guardarla aquí.</p>
+        <ion-button routerLink="/tabs/discover" shape="round">
+          <ion-icon slot="start" name="search-outline"></ion-icon>
+          Descubrir mascotas
+        </ion-button>
+      </div>
+    }
+  }
+</ion-content>

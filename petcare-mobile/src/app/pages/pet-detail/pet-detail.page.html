@@ -1,0 +1,89 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/discover"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ mascota?.nombre || 'Detalle' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (isLoading) {
+    <div class="spinner-container">
+      <ion-spinner></ion-spinner>
+    </div>
+  } @else if (mascota) {
+    <swiper-container [pagination]="true">
+      @for(foto of mascota.galeriaFotos; track foto; let i = $index) {
+        <swiper-slide (click)="openImageModal(i)">
+          <img [src]="foto" alt="Foto de {{mascota.nombre}}"/>
+        </swiper-slide>
+      }
+    </swiper-container>
+
+    <div class="ion-padding">
+      <ion-chip color="primary">{{ mascota.refugio.nombre }}</ion-chip>
+      <h1>{{ mascota.nombre }}</h1>
+      <p class="description">{{ mascota.descripcion }}</p>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <ion-icon name="paw-outline"></ion-icon>
+          <strong>Especie</strong>
+          <span>{{ mascota.especie }}</span>
+        </div>
+        <div class="detail-item">
+          <ion-icon name="male-female-outline"></ion-icon>
+          <strong>Sexo</strong>
+          <span>{{ mascota.sexo }}</span>
+        </div>
+        <div class="detail-item">
+          <ion-icon name="calendar-number-outline"></ion-icon>
+          <strong>Edad</strong>
+          <span>{{ mascota.edad }} años</span>
+        </div>
+        <div class="detail-item">
+          <ion-icon name="resize-outline"></ion-icon>
+          <strong>Tamaño</strong>
+          <span>{{ mascota.tamano }}</span>
+        </div>
+      </div>
+
+      <div class="adopt-button-container">
+        @switch (mascota.estado) {
+          @case ('DISPONIBLE') {
+            <ion-button 
+                expand="block" 
+                shape="round" 
+                class="adopt-button"
+                [routerLink]="['/tabs/discover', mascota._id, 'apply']">
+                <ion-icon slot="start" name="paw"></ion-icon>
+                ¡Adóptame!
+            </ion-button>
+          }
+          @case ('EN_PROCESO') {
+            <ion-button expand="block" shape="round" class="adopt-button" [disabled]="true" color="warning">
+                <ion-icon slot="start" name="hourglass-outline"></ion-icon>
+                Solicitud en Proceso
+            </ion-button>
+          }
+          @case ('ADOPTADA') {
+            <ion-button expand="block" shape="round" class="adopt-button" [disabled]="true" color="success">
+                <ion-icon slot="start" name="home"></ion-icon>
+                ¡Ya fui adoptado!
+            </ion-button>
+          }
+        }
+      </div>
+    </div>
+    
+    <ion-fab vertical="bottom" horizontal="end">
+      <ion-fab-button (click)="toggleFavorite()" [color]="isFavorite ? 'danger' : 'light'">
+        <ion-icon 
+          [name]="isFavorite ? 'heart' : 'heart-outline'"
+          [class.animate-pop]="isAnimating">
+        </ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  }
+</ion-content>

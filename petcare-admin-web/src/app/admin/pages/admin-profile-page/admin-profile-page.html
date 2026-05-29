@@ -1,0 +1,33 @@
+<h1>Mi Perfil de Administrador</h1>
+
+@if (isLoading) {
+  <div class="spinner-container"><mat-spinner></mat-spinner></div>
+} @else {
+  <mat-card>
+    <mat-card-content>
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre Completo</mat-label>
+          <input matInput formControlName="nombre">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Correo Electrónico (no editable)</mat-label>
+          <input matInput formControlName="correo">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nueva Contraseña</mat-label>
+          <input matInput type="password" formControlName="contrasena" 
+                 placeholder="Dejar en blanco para no cambiar">
+        </mat-form-field>
+        
+        <div class="actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="profileForm.invalid">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}

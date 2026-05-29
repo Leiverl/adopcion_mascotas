@@ -1,0 +1,28 @@
+<div class="header-container">
+  <h1>Gestión de Eventos</h1>
+  <button mat-raised-button color="primary" routerLink="/eventos/new">
+    <mat-icon>add</mat-icon>
+    Crear Evento
+  </button>
+</div>
+
+<div class="event-grid">
+  @for (evento of eventos; track evento._id) {
+    <mat-card class="event-card">
+      <img mat-card-image [src]="evento.imagenPrincipal" alt="Imagen de {{ evento.titulo }}">
+      <mat-card-header>
+        <mat-card-title>{{ evento.titulo }}</mat-card-title>
+        <mat-card-subtitle>{{ evento.fecha | date:'fullDate' }} - {{ evento.hora }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ evento.descripcion | slice:0:100 }}...</p>
+      </mat-card-content>
+      <mat-card-actions align="end">
+       <button mat-stroked-button color="accent" (click)="onNotify(evento)">Notificar</button>
+        <button mat-stroked-button color="primary" (click)="verInteresados(evento)">Ver Interesados</button>
+        <button mat-button [routerLink]="['/eventos/edit', evento._id]">Editar</button>
+        <button mat-button color="warn" (click)="onDelete(evento._id, evento.titulo)">Eliminar</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+</div>

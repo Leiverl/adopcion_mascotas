@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/discover"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Formulario de Adopción</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="adoptionForm" (ngSubmit)="onSubmit()">
+    <ion-list>
+      <ion-item>
+        <ion-textarea 
+          label="¿Por qué te gustaría adoptar esta mascota?" 
+          labelPlacement="floating"
+          [autoGrow]="true"
+          formControlName="motivoAdopcion"
+          errorText="Respuesta requerida">
+        </ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="¿Tienes otras mascotas?" labelPlacement="floating" formControlName="tieneOtrasMascotas" interface="action-sheet">
+          <ion-select-option [value]="true">Sí</ion-select-option>
+          <ion-select-option [value]="false">No</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-textarea 
+          label="Describe brevemente tu vivienda"
+          helperText="Ej: casa con patio, apartamento, etc."
+          labelPlacement="floating"
+          [autoGrow]="true"
+          formControlName="descripcionVivienda"
+          errorText="Respuesta requerida">
+        </ion-textarea>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-checkbox formControlName="acuerdoVisitas" labelPlacement="end">
+          Estoy de acuerdo con el proceso de seguimiento.
+        </ion-checkbox>
+      </ion-item>
+    </ion-list>
+
+    <ion-button expand="block" shape="round" type="submit" class="ion-margin-top" [disabled]="adoptionForm.invalid">
+      Enviar Solicitud
+    </ion-button>
+  </form>
+</ion-content>

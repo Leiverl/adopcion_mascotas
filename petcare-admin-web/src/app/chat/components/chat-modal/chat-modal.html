@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Chat sobre {{ data.solicitud.mascota?.nombre }}</h2>
+<mat-dialog-content class="chat-content" #messageList>
+  <div class="message-list">
+    @for(msg of messages; track msg._id) {
+      <div class="message-bubble" [class.sent]="msg.remitente._id === currentUserId" [class.received]="msg.remitente._id !== currentUserId">
+        <div class="message-author">{{ msg.remitente.nombre }}</div>
+        <div class="message-text">{{ msg.cuerpo }}</div>
+        <div class="message-time">{{ msg.createdAt | date:'shortTime' }}</div>
+      </div>
+    }
+    @if(isTyping) {
+      <div class="message-bubble received">
+        <div class="typing-indicator">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    }
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions class="chat-input-area">
+  <mat-form-field appearance="outline" class="full-width">
+    <input matInput placeholder="Escribe un mensaje..." [formControl]="messageControl" (keydown.enter)="sendMessage()" (input)="onInput()">
+  </mat-form-field>
+  <button mat-fab color="primary" (click)="sendMessage()" [disabled]="!messageControl.value?.trim()">
+    <mat-icon>send</mat-icon>
+  </button>
+</mat-dialog-actions>

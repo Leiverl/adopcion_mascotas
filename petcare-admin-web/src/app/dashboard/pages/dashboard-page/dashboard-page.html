@@ -1,0 +1,49 @@
+<h1>Dashboard Principal</h1>
+
+@if (isLoading) {
+  <div class="spinner-container">
+    <mat-spinner></mat-spinner>
+  </div>
+} @else if (stats) {
+  <div class="stats-container">
+    <mat-card class="stat-card blue">
+      <div class="stat-icon">
+        <mat-icon>pets</mat-icon>
+      </div>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.mascotasActivas }}</div>
+        <div class="stat-title">Mascotas Activas</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card orange">
+      <div class="stat-icon">
+        <mat-icon>pending_actions</mat-icon>
+      </div>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.solicitudesPendientes }}</div>
+        <div class="stat-title">Solicitudes Pendientes</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card green">
+      <div class="stat-icon">
+        <mat-icon>event_available</mat-icon>
+      </div>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.adopcionesMes }}</div>
+        <div class="stat-title">Adopciones (Últ. Mes)</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card red">
+      <div class="stat-icon">
+        <mat-icon>mail</mat-icon>
+      </div>
+      <mat-card-content>
+        <div class="stat-value">{{ stats.mensajesNuevos }}</div>
+        <div class="stat-title">Mensajes Nuevos</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

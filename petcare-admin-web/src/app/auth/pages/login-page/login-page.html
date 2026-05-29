@@ -1,0 +1,50 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>¡Bienvenido a PetCare!</mat-card-title>
+      <mat-card-subtitle>Portal de Administración</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Correo Electrónico</mat-label>
+          <input matInput formControlName="correo" type="email" placeholder="ej: admin@petcare.com">
+          @if (loginForm.get('correo')?.touched && loginForm.get('correo')?.hasError('required')) {
+            <mat-error>El correo es <strong>requerido</strong>.</mat-error>
+          }
+          @if (loginForm.get('correo')?.touched && loginForm.get('correo')?.hasError('email')) {
+            <mat-error>Por favor, ingrese un correo válido.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="contrasena" [type]="hidePassword ? 'password' : 'text'">
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          @if (loginForm.get('contrasena')?.touched && loginForm.get('contrasena')?.hasError('required')) {
+            <mat-error>La contraseña es <strong>requerida</strong>.</mat-error>
+          }
+        </mat-form-field>
+
+        @if (loginError) {
+          <div class="login-error-message">
+            {{ loginError }}
+          </div>
+        }
+        
+        <div class="button-container">
+          @if (isLoading) {
+            <mat-spinner diameter="35"></mat-spinner>
+          } @else {
+            <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="loginForm.invalid">
+              Iniciar Sesión
+            </button>
+          }
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

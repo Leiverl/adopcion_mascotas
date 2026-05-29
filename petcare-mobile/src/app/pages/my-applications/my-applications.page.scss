@@ -1,0 +1,97 @@
+.spinner-container, .empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.empty-state {
+  color: var(--subtle-text-color);
+  ion-icon { font-size: 5rem; margin-bottom: 16px; }
+  h2 { color: var(--text-color); }
+}
+
+// Estilos de la Línea de Tiempo
+.timeline {
+  padding: 16px;
+}
+
+.timeline-item {
+  display: flex;
+  position: relative;
+  
+  // La línea vertical que conecta los items
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background-color: var(--ion-color-light-shade);
+  }
+}
+
+.timeline-icon {
+  width: 50px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+
+  ion-icon {
+    font-size: 32px;
+    padding: 8px;
+    border-radius: 50%;
+    background: var(--app-background-color);
+  }
+}
+
+.timeline-card {
+  width: 100%;
+  margin: 0 0 16px 0;
+  box-shadow: var(--card-shadow);
+
+  .card-header-item {
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+
+    ion-thumbnail {
+      --size: 50px;
+      --border-radius: 8px;
+    }
+
+    ion-label h2 {
+      font-weight: 700;
+    }
+  }
+  
+  ion-card-content {
+    padding-top: 0;
+  }
+
+  .status-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--ion-color-light-shade);
+    padding: 12px 0;
+    margin: 8px 16px;
+
+    span {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 8px 8px 8px;
+  }
+}

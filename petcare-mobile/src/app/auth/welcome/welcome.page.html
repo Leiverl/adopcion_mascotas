@@ -1,0 +1,30 @@
+<ion-content [fullscreen]="true">
+  <div class="background-shape"></div>
+
+  <div class="container">
+    <div class="header">
+      <img src="assets/icon/pet.png" alt="PetCare Logo" class="logo animate-fade-in-up">
+      <h1 class="animate-fade-in-up" style="animation-delay: 100ms;">
+        Bienvenido a PetCare
+      </h1>
+      <p class="animate-fade-in-up" style="animation-delay: 200ms;">
+        Adopta, no compres. Encuentra a tu nuevo mejor amigo.
+      </p>
+    </div>
+
+    <div class="actions animate-fade-in-up" style="animation-delay: 300ms;">
+      <ion-button expand="block" shape="round" color="primary" routerLink="/login" routerDirection="forward">
+        Iniciar Sesión
+      </ion-button>
+      <ion-button expand="block" shape="round" fill="outline" routerLink="/register" routerDirection="forward">
+        Registrarse
+      </ion-button>
+
+      <div class="separator">
+        <span>o</span>
+      </div>
+      
+      <div id="google-btn"></div>
+    </div>
+  </div>
+</ion-content>

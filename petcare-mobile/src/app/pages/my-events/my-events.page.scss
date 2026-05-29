@@ -1,0 +1,71 @@
+.spinner-container, .empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  color: var(--subtle-text-color);
+}
+
+.empty-state {
+  ion-icon { font-size: 5rem; margin-bottom: 16px; }
+  h2 { color: var(--text-color); }
+  p { margin-bottom: 24px; }
+}
+
+.event-list {
+  background: none;
+}
+
+// --- ESTILOS MODIFICADOS ---
+ion-item-sliding {
+  margin-bottom: 16px;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden; // Muy importante para que los bordes redondeados se apliquen
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.event-item {
+  --background: var(--card-background-color);
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  --min-height: 90px;
+
+  ion-thumbnail {
+    --size: 60px;
+    --border-radius: 12px;
+    margin-right: 12px;
+  }
+
+  ion-label {
+    h2 {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+      color: var(--text-color);
+    }
+    p {
+      color: var(--subtle-text-color);
+      font-size: 0.9rem;
+    }
+  }
+
+  .countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    
+    span {
+      color: var(--ion-color-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+}

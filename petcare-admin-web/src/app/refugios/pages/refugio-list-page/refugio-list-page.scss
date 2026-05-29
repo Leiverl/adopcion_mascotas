@@ -1,0 +1,56 @@
+table {
+  width: 100%;
+}
+
+.pet-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+.logo-avatar {
+  width: 55px;          // Ancho fijo
+  height: 55px;         // Alto fijo
+  border-radius: 50%;   // Para hacerlo circular
+  object-fit: cover;    // Evita que la imagen se deforme
+  border: 1px solid #eee; // Un borde sutil opcional
+}
+
+// Estilos existentes para el layout
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}

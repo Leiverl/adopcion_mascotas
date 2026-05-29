@@ -1,0 +1,22 @@
+# ── Node ─────────────────────────────────────────────────
+node_modules/
+dist/
+build/
+
+# ── Entorno — NUNCA subir al repositorio ──────────────────────
+.env
+.env.local
+.env.production
+.env.staging
+
+# ── Logs ─────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-error.log
+
+# ── Tests ───────────────────────────────────────────────
+coverage/
+
+# ── OS ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

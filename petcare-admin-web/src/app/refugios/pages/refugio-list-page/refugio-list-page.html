@@ -1,0 +1,56 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Gestión de Refugios</mat-card-title>
+    <span class="spacer"></span>
+    <button mat-raised-button color="primary" routerLink="/refugios/new">
+      <mat-icon>add</mat-icon>
+      Crear Refugio
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    @if (isLoading) {
+      <div class="spinner-container">
+        <mat-spinner></mat-spinner>
+      </div>
+    } @else {
+      <div class="table-container mat-elevation-z8">
+        <table mat-table [dataSource]="refugios">
+
+          <ng-container matColumnDef="logo">
+            <th mat-header-cell *matHeaderCellDef> Logo </th>
+            <td mat-cell *matCellDef="let refugio">
+              <img [src]="refugio.logo || 'https://via.placeholder.com/40'" 
+                   alt="Logo de {{refugio.nombre}}" 
+                   class="logo-avatar">
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> Nombre </th>
+            <td mat-cell *matCellDef="let refugio"> {{refugio.nombre}} </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="direccion">
+            <th mat-header-cell *matHeaderCellDef> Dirección </th>
+            <td mat-cell *matCellDef="let refugio"> {{refugio.direccion}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let refugio">
+              <button mat-icon-button color="primary" matTooltip="Editar Refugio" (click)="onEdit(refugio._id)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Eliminar Refugio" (click)="onDelete(refugio._id, refugio.nombre)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

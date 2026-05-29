@@ -1,0 +1,132 @@
+<div class="kanban-board" cdkDropListGroup>
+  <div class="kanban-column">
+    <h2>Nuevas</h2>
+    <div class="kanban-list" id="NUEVA" cdkDropList [cdkDropListData]="nuevas" (cdkDropListDropped)="drop($event)">
+      @for (solicitud of nuevas; track solicitud._id) {
+        <mat-card class="kanban-card" cdkDrag>
+          <mat-card-header>
+            <img mat-card-avatar [src]="solicitud.mascota?.galeriaFotos?.[0] || 'https://via.placeholder.com/40'" alt="Foto mascota">
+            <mat-card-title>{{ solicitud.mascota?.nombre || 'Mascota eliminada' }}</mat-card-title>
+            <mat-card-subtitle>Para: {{ solicitud.adoptante.nombre }}</mat-card-subtitle>
+          </mat-card-header>
+          <button mat-icon-button class="card-menu-button" [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="onOpenChat(solicitud)">
+              <mat-icon color="primary">chat</mat-icon>
+              <span>Chatear</span>
+            </button>
+            <button mat-menu-item (click)="onDeleteSolicitud(solicitud)">
+              <mat-icon color="warn">delete_outline</mat-icon>
+              <span>Eliminar Solicitud</span>
+            </button>
+          </mat-menu>
+        </mat-card>
+      }
+      @if (nuevas.length === 0) {
+        <div class="empty-column-message">No hay solicitudes nuevas.</div>
+      }
+    </div>
+  </div>
+
+  <div class="kanban-column">
+    <h2>En Revisión</h2>
+    <div class="kanban-list" id="EN_REVISION" cdkDropList [cdkDropListData]="enRevision" (cdkDropListDropped)="drop($event)">
+        @for (solicitud of enRevision; track solicitud._id) {
+            <mat-card class="kanban-card" cdkDrag>
+              <mat-card-header>
+                <img mat-card-avatar [src]="solicitud.mascota?.galeriaFotos?.[0] || 'https://via.placeholder.com/40'" alt="Foto mascota">
+                <mat-card-title>{{ solicitud.mascota?.nombre || 'Mascota eliminada' }}</mat-card-title>
+                <mat-card-subtitle>Para: {{ solicitud.adoptante.nombre }}</mat-card-subtitle>
+              </mat-card-header>
+              <button mat-icon-button class="card-menu-button" [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onOpenChat(solicitud)">
+                  <mat-icon color="primary">chat</mat-icon>
+                  <span>Chatear</span>
+                </button>
+                <button mat-menu-item (click)="onDeleteSolicitud(solicitud)">
+                  <mat-icon color="warn">delete_outline</mat-icon>
+                  <span>Eliminar Solicitud</span>
+                </button>
+              </mat-menu>
+            </mat-card>
+          }
+      @if (enRevision.length === 0) {
+        <div class="empty-column-message">Arrastra una solicitud aquí.</div>
+      }
+    </div>
+  </div>
+
+  <div class="kanban-column">
+    <h2>Aprobadas</h2>
+    <div class="kanban-list" id="APROBADA" cdkDropList [cdkDropListData]="aprobadas" (cdkDropListDropped)="drop($event)">
+        @for (solicitud of aprobadas; track solicitud._id) {
+            <mat-card class="kanban-card" cdkDrag>
+              <mat-card-header>
+                <img mat-card-avatar [src]="solicitud.mascota?.galeriaFotos?.[0] || 'https://via.placeholder.com/40'" alt="Foto mascota">
+                <mat-card-title>{{ solicitud.mascota?.nombre || 'Mascota eliminada' }}</mat-card-title>
+                <mat-card-subtitle>Para: {{ solicitud.adoptante.nombre }}</mat-card-subtitle>
+              </mat-card-header>
+              <button mat-icon-button class="card-menu-button" [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onOpenChat(solicitud)">
+                  <mat-icon color="primary">chat</mat-icon>
+                  <span>Chatear</span>
+                </button>
+                <button mat-menu-item (click)="onDeleteSolicitud(solicitud)">
+                  <mat-icon color="warn">delete_outline</mat-icon>
+                  <span>Eliminar Solicitud</span>
+                </button>
+              </mat-menu>
+
+              @if(solicitud.isProcessing) {
+                <div class="processing-overlay">
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span>Enviando aprobación...</span>
+                </div>
+              }
+            </mat-card>
+          }
+      @if (aprobadas.length === 0) {
+        <div class="empty-column-message">Arrastra una solicitud aquí.</div>
+      }
+    </div>
+  </div>
+
+  <div class="kanban-column">
+    <h2>Rechazadas</h2>
+    <div class="kanban-list" id="RECHAZADA" cdkDropList [cdkDropListData]="rechazadas" (cdkDropListDropped)="drop($event)">
+        @for (solicitud of rechazadas; track solicitud._id) {
+            <mat-card class="kanban-card" cdkDrag>
+              <mat-card-header>
+                <img mat-card-avatar [src]="solicitud.mascota?.galeriaFotos?.[0] || 'https://via.placeholder.com/40'" alt="Foto mascota">
+                <mat-card-title>{{ solicitud.mascota?.nombre || 'Mascota eliminada' }}</mat-card-title>
+                <mat-card-subtitle>Para: {{ solicitud.adoptante.nombre }}</mat-card-subtitle>
+              </mat-card-header>
+              <button mat-icon-button class="card-menu-button" [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="onOpenChat(solicitud)">
+                  <mat-icon color="primary">chat</mat-icon>
+                  <span>Chatear</span>
+                </button>
+                <button mat-menu-item (click)="onDeleteSolicitud(solicitud)">
+                  <mat-icon color="warn">delete_outline</mat-icon>
+                  <span>Eliminar Solicitud</span>
+                </button>
+              </mat-menu>
+            </mat-card>
+          }
+      @if (rechazadas.length === 0) {
+        <div class="empty-column-message">Arrastra una solicitud aquí.</div>
+      }
+    </div>
+  </div>
+</div>

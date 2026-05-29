@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Filtros</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="filterForm">
+    <ion-list>
+      <ion-item>
+        <ion-select label="Especie" labelPlacement="floating" formControlName="especie">
+          <ion-select-option value="Perro">Perro</ion-select-option>
+          <ion-select-option value="Gato">Gato</ion-select-option>
+          <ion-select-option value="Conejo">Conejo</ion-select-option>
+          <ion-select-option value="Pajaro">Pájaro</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="Tamaño" labelPlacement="floating" formControlName="tamano">
+          <ion-select-option value="Pequeño">Pequeño</ion-select-option>
+          <ion-select-option value="Mediano">Mediano</ion-select-option>
+          <ion-select-option value="Grande">Grande</ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <ion-item>
+        <ion-select label="Sexo" labelPlacement="floating" formControlName="sexo">
+          <ion-select-option value="MACHO">Macho</ion-select-option>
+          <ion-select-option value="HEMBRA">Hembra</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="clearFilters()" fill="outline">Limpiar</ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="applyFilters()">Aplicar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,107 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      {{ isEditMode ? 'Editar Mascota' : 'Registrar Nueva Mascota' }}
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="petForm" (ngSubmit)="onSubmit()" class="pet-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Especie</mat-label>
+          <mat-select formControlName="especie">
+            @for (especie of especies; track especie) {
+              <mat-option [value]="especie">{{ especie }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Raza</mat-label>
+          <input matInput formControlName="raza">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Edad (años)</mat-label>
+          <input matInput type="number" formControlName="edad">
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Sexo</mat-label>
+          <mat-select formControlName="sexo">
+            <mat-option value="MACHO">Macho</mat-option>
+            <mat-option value="HEMBRA">Hembra</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Tamaño</mat-label>
+          <mat-select formControlName="tamano">
+            <mat-option value="Pequeño">Pequeño</mat-option>
+            <mat-option value="Mediano">Mediano</mat-option>
+            <mat-option value="Grande">Grande</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      
+      @if (esAdmin) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Asignar a Refugio</mat-label>
+          <mat-select formControlName="refugio">
+            @for (refugio of listaRefugios; track refugio) {
+              <mat-option [value]="refugio._id">{{ refugio.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="4"></textarea>
+      </mat-form-field>
+
+      <div class="file-upload-section">
+        <label class="mat-body-strong">
+          {{ isEditMode ? 'Reemplazar fotos actuales' : 'Fotos de la Mascota' }}
+        </label>
+        <p class="mat-body-2" *ngIf="isEditMode">
+          Si subes nuevas fotos, la galería actual se reemplazará por completo.
+        </p>
+        
+        <input type="file" multiple (change)="onFileSelected($event)" #fileInput>
+        
+        @for(file of selectedFiles; track file) {
+          <p class="file-name">Nuevo: {{ file.name }}</p>
+        }
+
+        @if(isEditMode && fotosActuales.length > 0 && selectedFiles.length === 0) {
+          <div class="current-photos">
+            <p class="mat-body">Fotos Actuales:</p>
+            @for(foto of fotosActuales; track foto) {
+              <img [src]="foto" alt="Foto actual" class="photo-preview">
+            }
+          </div>
+        }
+      </div>
+
+      <!-- --- SECCIÓN DE BOTONES MODIFICADA --- -->
+      <div class="actions">
+        <button mat-stroked-button type="button" routerLink="/mascotas/list" [disabled]="isLoading">Cancelar</button>
+        
+        <button mat-raised-button color="primary" type="submit" [disabled]="petForm.invalid || isLoading">
+          @if (isLoading) {
+            <mat-spinner diameter="24"></mat-spinner>
+          } @else {
+            <span>{{ isEditMode ? 'Actualizar Mascota' : 'Guardar Mascota' }}</span>
+          }
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

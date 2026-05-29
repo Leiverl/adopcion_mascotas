@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Interesados en "{{ data.eventoTitulo }}"</h2>
+
+<mat-dialog-content>
+  @if (isLoading) {
+    <div style="display: flex; justify-content: center; padding: 20px;">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  } @else {
+    @if (interesados.length > 0) {
+      <mat-list role="list">
+        @for (usuario of interesados; track usuario._id) {
+          <mat-list-item role="listitem">
+            <mat-icon matListItemIcon>person</mat-icon>
+            <div matListItemTitle>{{ usuario.nombre }}</div>
+            <div matListItemLine>{{ usuario.correo }}</div>
+          </mat-list-item>
+        }
+      </mat-list>
+    } @else {
+      <p style="text-align: center; color: grey; padding: 20px;">
+        Aún no hay personas interesadas en este evento.
+      </p>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

@@ -1,0 +1,47 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      {{ isEditMode ? 'Editar Usuario' : 'Crear Nuevo Usuario' }}
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre Completo</mat-label>
+        <input matInput formControlName="nombre">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo Electrónico</mat-label>
+        <input matInput type="email" formControlName="correo">
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="rol">
+          @for(rol of roles; track rol) {
+            <mat-option [value]="rol">{{ rol }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="contrasena" 
+               [placeholder]="isEditMode ? 'Dejar en blanco para no cambiar' : ''">
+      </mat-form-field>
+
+      <div class="actions">
+        @if(isLoading) {
+          <mat-spinner diameter="35"></mat-spinner>
+        } @else {
+          <button mat-stroked-button type="button" routerLink="/usuarios/list">Cancelar</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid">
+            {{ isEditMode ? 'Actualizar Usuario' : 'Guardar Usuario' }}
+          </button>
+        }
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

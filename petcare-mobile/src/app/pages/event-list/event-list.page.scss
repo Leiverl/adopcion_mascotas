@@ -1,0 +1,110 @@
+.spinner-container, .empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: calc(100% - 100px); // Ajustar para que no quede detrás del header
+  padding: 24px;
+  text-align: center;
+  color: var(--subtle-text-color);
+}
+
+.empty-state {
+  ion-icon { font-size: 5rem; margin-bottom: 16px; }
+  h2 { color: var(--text-color); }
+}
+
+ion-segment {
+  --background: var(--ion-color-light);
+}
+
+.event-list {
+  padding: 16px;
+  background: none;
+}
+
+.event-card {
+  margin: 0 0 16px 0;
+  box-shadow: var(--card-shadow);
+  border-radius: var(--card-radius);
+  overflow: hidden; // Importante para los bordes redondeados en la imagen
+  position: relative; // Para el contenido superpuesto
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; // Alinea el contenido en la parte inferior
+
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  // Overlay oscuro para que el texto sea legible
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 16px;
+    color: white;
+  }
+  
+  .date-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: var(--text-color);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 60px;
+    height: 60px;
+    text-align: center;
+    font-weight: bold;
+
+    .month {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+    .day {
+      font-size: 1.8rem;
+      line-height: 1;
+      color: var(--ion-color-primary);
+    }
+  }
+  
+  .details {
+    ion-card-title {
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: white;
+    }
+    ion-card-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+    }
+  }
+
+  &.past-event {
+    // Atenuamos visualmente los eventos pasados
+    img {
+      filter: grayscale(80%);
+    }
+    &::after {
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%);
+    }
+  }
+}

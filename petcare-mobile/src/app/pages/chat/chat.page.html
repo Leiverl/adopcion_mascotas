@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/profile/applications"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ chatPartnerName }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="message-list">
+    @for (msg of messages; track msg._id) {
+      <div class="message-bubble-wrapper" 
+           [class.sent-wrapper]="msg.remitente._id === currentUserId"
+           [class.received-wrapper]="msg.remitente._id !== currentUserId">
+        <div class="message-bubble">
+          <div class="message-text">{{ msg.cuerpo }}</div>
+          <div class="message-time">{{ msg.createdAt | date:'shortTime' }}</div>
+        </div>
+      </div>
+    }
+    @if(isTyping) {
+      <div class="message-bubble-wrapper received-wrapper">
+        <div class="message-bubble">
+          <div class="typing-indicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar class="chat-input-toolbar">
+    <ion-item lines="none">
+      <ion-input
+        [formControl]="messageControl"
+        placeholder="Escribe un mensaje..."
+        (ionInput)="onInput()">
+      </ion-input>
+    </ion-item>
+    <ion-buttons slot="end">
+      <ion-button (click)="sendMessage()" [disabled]="!messageControl.value?.trim()" shape="round" fill="solid" color="primary">
+        <ion-icon slot="icon-only" name="send"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

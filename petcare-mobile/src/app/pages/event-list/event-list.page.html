@@ -1,0 +1,77 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Eventos</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [value]="segment" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="upcoming">
+        <ion-label>Próximos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="past">
+        <ion-label>Pasados</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (isLoading) {
+    <div class="spinner-container"><ion-spinner></ion-spinner></div>
+  } @else {
+    <div [ngSwitch]="segment">
+      <div *ngSwitchCase="'upcoming'">
+        @if (upcomingEvents.length > 0) {
+          <ion-list class="event-list">
+            @for (evento of upcomingEvents; track evento._id) {
+              <ion-card class="event-card animate-fade-in-up" [routerLink]="['/tabs/events', evento._id]">
+                <img [src]="evento.imagenPrincipal" alt="Imagen de {{ evento.titulo }}"/>
+                <div class="card-content">
+                  <div class="date-display">
+                    <span class="month">{{ evento.fecha | date:'MMM' }}</span>
+                    <span class="day">{{ evento.fecha | date:'d' }}</span>
+                  </div>
+                  <div class="details">
+                    <ion-card-title>{{ evento.titulo }}</ion-card-title>
+                    <ion-card-subtitle>{{ evento.organizador.nombre }}</ion-card-subtitle>
+                  </div>
+                </div>
+              </ion-card>
+            }
+          </ion-list>
+        } @else {
+          <div class="empty-state">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+            <h2>No hay eventos próximos</h2>
+            <p>Vuelve a consultar más tarde para ver nuevas jornadas de adopción.</p>
+          </div>
+        }
+      </div>
+      <div *ngSwitchCase="'past'">
+        @if (pastEvents.length > 0) {
+          <ion-list class="event-list">
+            @for (evento of pastEvents; track evento._id) {
+              <ion-card class="event-card past-event animate-fade-in-up" [routerLink]="['/tabs/events', evento._id]">
+                <img [src]="evento.imagenPrincipal" alt="Imagen de {{ evento.titulo }}"/>
+                <div class="card-content">
+                  <div class="date-display">
+                    <span class="month">{{ evento.fecha | date:'MMM' }}</span>
+                    <span class="day">{{ evento.fecha | date:'d' }}</span>
+                  </div>
+                  <div class="details">
+                    <ion-card-title>{{ evento.titulo }}</ion-card-title>
+                    <ion-card-subtitle>{{ evento.organizador.nombre }}</ion-card-subtitle>
+                  </div>
+                </div>
+              </ion-card>
+            }
+          </ion-list>
+        } @else {
+          <div class="empty-state">
+            <ion-icon name="archive-outline"></ion-icon>
+            <h2>No hay eventos pasados</h2>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</ion-content>

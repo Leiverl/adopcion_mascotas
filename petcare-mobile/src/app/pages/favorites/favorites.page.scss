@@ -1,0 +1,76 @@
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+// Estilos para la nueva lista de favoritos
+.favorite-list {
+  --ion-item-background: transparent; // Hacemos transparente el fondo del item
+  background: none; // Quitamos el fondo de la lista
+}
+
+.favorite-item {
+  --background: var(--card-background-color);
+  --border-radius: var(--card-radius);
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  margin-bottom: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--ion-color-light-shade);
+
+  ion-thumbnail {
+    --size: 70px;
+    --border-radius: 12px;
+    margin-right: 12px;
+  }
+
+  ion-label {
+    h2 {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+    p {
+      color: var(--subtle-text-color);
+      font-size: 0.9rem;
+    }
+    .refugio-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+      margin-top: 6px;
+    }
+  }
+}
+
+// Estilos mejorados para el estado vacío
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  color: var(--subtle-text-color);
+
+  ion-icon {
+    font-size: 5rem;
+    margin-bottom: 16px;
+    color: var(--ion-color-primary-tint);
+  }
+
+  h2 {
+    color: var(--text-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.4rem;
+  }
+
+  p {
+    margin-bottom: 24px;
+    max-width: 280px;
+  }
+}
