@@ -23,7 +23,7 @@ export class FavoritosService {
     return nuevoFavorito.save();
   }
 
-  async removeFavorito(usuarioId: string, mascotaId: string) {
+  async removeFavorito(usuarioId: string, mascotaId: string): Promise<any> {
     return this.favoritoModel.deleteOne({ usuario: usuarioId, mascota: mascotaId });
   }
 }
