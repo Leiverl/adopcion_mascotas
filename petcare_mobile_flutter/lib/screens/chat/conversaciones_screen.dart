@@ -109,6 +109,11 @@ class _ConversacionTile extends StatelessWidget {
   final AdoptionRequest request;
   const _ConversacionTile({required this.request});
 
+  String? get _fotoUrl {
+    final fotos = request.mascota.galeriaFotos;
+    return fotos.isNotEmpty ? fotos[0] : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -131,9 +136,9 @@ class _ConversacionTile extends StatelessWidget {
               // Avatar mascota
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: request.mascota.fotoUrl != null
+                child: _fotoUrl != null
                     ? Image.network(
-                        request.mascota.fotoUrl!,
+                        _fotoUrl!,
                         width: 56,
                         height: 56,
                         fit: BoxFit.cover,
@@ -156,7 +161,7 @@ class _ConversacionTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Refugio: ${request.refugio?.nombre ?? "—"}',
+                      'Solicitud de adopción',
                       style: GoogleFonts.poppins(
                           fontSize: 12, color: AppColors.textMedium),
                     ),
