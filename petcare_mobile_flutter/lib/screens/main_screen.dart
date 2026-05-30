@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:petcare_mobile/screens/chat/chat_screen.dart';
+import 'package:petcare_mobile/screens/chat/conversaciones_screen.dart';
 import 'package:petcare_mobile/screens/discover/discover_screen.dart';
 import 'package:petcare_mobile/screens/favorites/favorites_screen.dart';
 import 'package:petcare_mobile/screens/eventos/eventos_screen.dart';
@@ -14,14 +14,13 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen>
-    with SingleTickerProviderStateMixin {
+class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   static const List<Widget> _screens = [
     DiscoverScreen(),
     FavoritesScreen(),
-    ChatScreen(),
+    ConversacionesScreen(),
     EventosScreen(),
     ProfileScreen(),
   ];
