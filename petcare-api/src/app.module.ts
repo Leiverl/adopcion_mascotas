@@ -33,12 +33,12 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
+        uri: configService.get<string>('MONGODB_URI'),
       }),
     }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
-    
+
     // Módulos de la aplicación
     UsuariosModule,
     AuthModule,
