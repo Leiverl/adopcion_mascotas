@@ -26,16 +26,17 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   final CardSwiperController _swiperController = CardSwiperController();
   late ConfettiController _confettiController;
   int _currentCardIndex = 0;
-  
+
   Map<String, String> _currentFilters = {};
 
   @override
   void initState() {
     super.initState();
     _loadPets();
-    _confettiController = ConfettiController(duration: const Duration(milliseconds: 500)); // Hacemos la animación más corta
+    _confettiController =
+        ConfettiController(duration: const Duration(milliseconds: 500));
   }
-  
+
   void _loadPets() {
     setState(() {
       _petsFuture = _petService.getPets(filters: _currentFilters);
@@ -51,7 +52,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       ),
       builder: (ctx) => FilterBottomSheet(initialFilters: _currentFilters),
     );
-
     if (newFilters != null) {
       setState(() {
         _currentFilters = newFilters;
@@ -67,28 +67,19 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     super.dispose();
   }
 
-  // --- MÉTODO _onFavorite ACTUALIZADO ---
   Future<void> _onFavorite(Pet pet, FavoritesProvider provider) async {
-    // 1. Verificamos el estado actual ANTES de hacer la llamada a la API
     final bool isCurrentlyFavorite = provider.isFavorite(pet.id);
-
-    // 2. Si NO es favorita, significa que la vamos a AÑADIR.
-    //    Entonces, disparamos la animación INMEDIATAMENTE.
     if (!isCurrentlyFavorite) {
       _confettiController.play();
     }
-
-    // 3. Ahora sí, llamamos al provider. Esta llamada puede tardar,
-    //    pero la animación ya se ejecutó.
     final message = await provider.toggleFavorite(pet);
-    
-    // 4. Mostramos el mensaje de resultado cuando la operación haya terminado.
     if (mounted) {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: message.contains('Añadido') ? Colors.green : Colors.blueGrey,
+          backgroundColor:
+              message.contains('Añadido') ? Colors.green : Colors.blueGrey,
         ),
       );
     }
@@ -96,8 +87,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final favoritesProvider = Provider.of<FavoritesProvider>(context, listen: false);
-    
+    final favoritesProvider =
+        Provider.of<FavoritesProvider>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Descubrir Mascotas'),
@@ -151,36 +143,42 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               }
 
               final pets = snapshot.data!;
-              
+
+              // ── Caso: una sola mascota ────────────────────────────────
               if (pets.length == 1) {
                 final singlePet = pets[0];
                 return Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                   child: Column(
                     children: [
                       Expanded(
                         child: PetCard(pet: singlePet),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 30.0, top: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                             _buildActionButton(
-                              icon: Icons.article_outlined,
-                              color: Colors.blue,
-                              onPressed: () {
-                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => PetDetailScreen(pet: singlePet),
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 88, top: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildActionButton(
+                                icon: Icons.article_outlined,
+                                color: Colors.blue,
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) =>
+                                        PetDetailScreen(pet: singlePet),
                                   ));
-                              }
-                            ),
-                            _buildActionButton(
-                              icon: Icons.favorite,
-                              color: Colors.pink,
-                              onPressed: () => _onFavorite(singlePet, favoritesProvider)
-                            ),
-                          ],
+                                },
+                              ),
+                              _buildActionButton(
+                                icon: Icons.favorite,
+                                color: Colors.pink,
+                                onPressed: () =>
+                                    _onFavorite(singlePet, favoritesProvider),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -188,6 +186,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 );
               }
 
+              // ── Caso: múltiples mascotas con swiper ────────────────────
               return Column(
                 children: [
                   Expanded(
@@ -195,49 +194,55 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       controller: _swiperController,
                       cardsCount: pets.length,
                       onSwipe: (prev, current, direction) {
-                        setState(() { _currentCardIndex = current ?? 0; });
-                        if (direction == CardSwiperDirection.right) {
-                          _onFavorite(pets[prev], favoritesProvider);
-                        }
+                        // FIX: ya NO se añade favorito al deslizar a la derecha.
+                        // El favorito solo se agrega desde el botón de corazón.
+                        setState(() {
+                          _currentCardIndex = current ?? 0;
+                        });
                         return true;
                       },
-                      padding: const EdgeInsets.all(24.0),
-                      cardBuilder: (context, index, ht, vt) => PetCard(pet: pets[index]),
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                      cardBuilder: (context, index, ht, vt) =>
+                          PetCard(pet: pets[index]),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 30.0, top: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildActionButton(
-                          icon: Icons.close,
-                          color: Colors.red,
-                          onPressed: () => _swiperController.swipe(CardSwiperDirection.left),
-                        ),
-                        _buildActionButton(
-                          icon: Icons.article_outlined,
-                          color: Colors.blue,
-                          size: 30,
-                          onPressed: () {
-                            final petIndex = _currentCardIndex;
-                            if (petIndex < pets.length) {
-                               Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => PetDetailScreen(pet: pets[petIndex]),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                        _buildActionButton(
-                          icon: Icons.favorite,
-                          color: Colors.pink,
-                          onPressed: () {
-                            _swiperController.swipe(CardSwiperDirection.right);
-                          },
-                        ),
-                      ],
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      // 88px = altura aprox del nav flotante (16 margen + 56 barra)
+                      padding: const EdgeInsets.only(bottom: 88, top: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildActionButton(
+                            icon: Icons.close,
+                            color: Colors.red,
+                            onPressed: () => _swiperController
+                                .swipe(CardSwiperDirection.left),
+                          ),
+                          _buildActionButton(
+                            icon: Icons.article_outlined,
+                            color: Colors.blue,
+                            size: 30,
+                            onPressed: () {
+                              if (_currentCardIndex < pets.length) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => PetDetailScreen(
+                                      pet: pets[_currentCardIndex]),
+                                ));
+                              }
+                            },
+                          ),
+                          _buildActionButton(
+                            icon: Icons.favorite,
+                            color: Colors.pink,
+                            // FIX: el corazón añade favorito directamente
+                            // sin hacer swipe, para no confundir los gestos.
+                            onPressed: () =>
+                                _onFavorite(pets[_currentCardIndex], favoritesProvider),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -252,8 +257,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             createParticlePath: (size) {
               final path = Path();
               path.moveTo(size.width / 2, size.height / 5);
-              path.cubicTo(size.width / 2, size.height / 5, size.width / 10, size.height / 2.5, size.width / 2, size.height);
-              path.cubicTo(size.width / 2, size.height, size.width - (size.width / 10), size.height / 2.5, size.width / 2, size.height / 5);
+              path.cubicTo(size.width / 2, size.height / 5,
+                  size.width / 10, size.height / 2.5, size.width / 2, size.height);
+              path.cubicTo(size.width / 2, size.height,
+                  size.width - (size.width / 10), size.height / 2.5,
+                  size.width / 2, size.height / 5);
               return path;
             },
           ),
@@ -261,7 +269,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       ),
     );
   }
-  
+
   Widget _buildActionButton({
     required IconData icon,
     required Color color,
