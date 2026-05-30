@@ -21,7 +21,7 @@ export class FavoritosController {
   }
 
   @Delete(':mascotaId')
-  removeFavorito(@Param('mascotaId') mascotaId: string, @Req() req) {
+  removeFavorito(@Param('mascotaId') mascotaId: string, @Req() req): Promise<any> {
     return this.favoritosService.removeFavorito(req.user.id, mascotaId);
   }
 }
