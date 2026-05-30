@@ -1,0 +1,9 @@
+{
+  "framework": "angular",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/petcare-admin-web/browser",
+  "installCommand": "npm install --legacy-peer-deps",
+  "engines": {
+    "node": "22.x"
+  }
+}
