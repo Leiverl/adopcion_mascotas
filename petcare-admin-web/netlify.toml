@@ -1,0 +1,9 @@
+[build]
+  base = "petcare-admin-web"
+  command = "npm install --legacy-peer-deps && npm run build"
+  publish = "dist/petcare-admin-web/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
