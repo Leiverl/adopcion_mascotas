@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://petcare-api-ocog.onrender.com/api/v1'
+  apiUrl: 'https://adopcionmascotas-production.up.railway.app/api/v1'
 };
