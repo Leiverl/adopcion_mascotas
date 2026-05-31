@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:petcare_mobile/providers/auth_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:petcare_mobile/providers/favorites_provider.dart';
+import 'package:petcare_mobile/providers/user_provider.dart';
 import 'package:petcare_mobile/screens/auth_wrapper.dart';
 import 'package:petcare_mobile/utils/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,6 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('es_ES', null);
 
-  // Estilo de barra de estado
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -31,6 +31,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => InteraccionesProvider()),
         ChangeNotifierProvider(create: (_) => NotificacionesProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MyApp(),
     ),
@@ -61,7 +62,6 @@ class MyApp extends StatelessWidget {
         textTheme: textTheme,
         primaryTextTheme: textTheme,
 
-        // AppBar
         appBarTheme: AppBarTheme(
           backgroundColor: AppColors.background,
           elevation: 0,
@@ -76,7 +76,6 @@ class MyApp extends StatelessWidget {
           systemOverlayStyle: SystemUiOverlayStyle.dark,
         ),
 
-        // ElevatedButton
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
@@ -93,7 +92,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        // OutlinedButton
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.primary,
@@ -109,11 +107,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        // InputDecoration
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.divider),
@@ -130,7 +128,6 @@ class MyApp extends StatelessWidget {
           hintStyle: GoogleFonts.poppins(color: AppColors.textMedium),
         ),
 
-        // Card
         cardTheme: CardThemeData(
           color: AppColors.cardBg,
           elevation: 4,
@@ -140,7 +137,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        // Chip
         chipTheme: ChipThemeData(
           backgroundColor: AppColors.background,
           selectedColor: AppColors.primary.withOpacity(0.15),
