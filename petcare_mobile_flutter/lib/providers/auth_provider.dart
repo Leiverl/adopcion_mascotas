@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:petcare_mobile/api/auth_service.dart';
+import 'package:petcare_mobile/services/fcm_service.dart';
 
 enum AuthStatus { uninitialized, authenticated, unauthenticated, authenticating }
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final FcmService _fcmService = FcmService();
   AuthStatus _status = AuthStatus.uninitialized;
   String? _token;
 
@@ -33,6 +35,8 @@ class AuthProvider with ChangeNotifier {
     _token = await _authService.getToken();
     if (_token != null && !JwtDecoder.isExpired(_token!)) {
       _status = AuthStatus.authenticated;
+      // Si ya hay sesión activa al abrir la app, inicializar FCM
+      await _fcmService.initialize();
     } else {
       _status = AuthStatus.unauthenticated;
     }
@@ -45,6 +49,8 @@ class AuthProvider with ChangeNotifier {
     try {
       await _authService.login(correo, contrasena);
       await _tryAutoLogin();
+      // Inicializar FCM tras login exitoso (pide permisos y envía token)
+      await _fcmService.initialize();
       return true;
     } catch (e) {
       _status = AuthStatus.unauthenticated;
@@ -75,6 +81,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // Eliminar FCM token del backend antes de borrar el JWT
+    await _fcmService.removeTokenOnLogout();
     await _authService.logout();
     _token = null;
     _status = AuthStatus.unauthenticated;
