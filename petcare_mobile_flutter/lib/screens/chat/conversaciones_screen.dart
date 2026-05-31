@@ -26,7 +26,8 @@ class _ConversacionesScreenState extends State<ConversacionesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mis Chats', style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
+        title: Text('Mis Chats',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
       ),
       body: FutureBuilder<List<AdoptionRequest>>(
         future: _future,
@@ -39,10 +40,10 @@ class _ConversacionesScreenState extends State<ConversacionesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: AppColors.textMedium),
+                  Icon(Icons.error_outline, size: 48, color: AppColors.textSub(context)),
                   const SizedBox(height: 12),
                   Text('No se pudieron cargar los chats',
-                      style: GoogleFonts.poppins(color: AppColors.textMedium)),
+                      style: GoogleFonts.poppins(color: AppColors.textSub(context))),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () => setState(() {
@@ -65,18 +66,17 @@ class _ConversacionesScreenState extends State<ConversacionesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.chat_bubble_outline,
-                      size: 72, color: AppColors.textMedium.withOpacity(0.4)),
+                      size: 72, color: AppColors.textSub(context).withOpacity(0.4)),
                   const SizedBox(height: 16),
                   Text('No tienes conversaciones aún',
                       style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textMedium)),
+                          fontSize: 16, fontWeight: FontWeight.w600,
+                          color: AppColors.textSub(context))),
                   const SizedBox(height: 8),
                   Text('Solicita adoptar una mascota\npara iniciar un chat',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
-                          fontSize: 13, color: AppColors.textMedium)),
+                          fontSize: 13, color: AppColors.textSub(context))),
                 ],
               ),
             );
@@ -84,19 +84,15 @@ class _ConversacionesScreenState extends State<ConversacionesScreen> {
 
           return RefreshIndicator(
             color: AppColors.primary,
-            onRefresh: () async {
-              setState(() {
-                _future = _service.getMyAdoptionRequests();
-              });
-            },
+            onRefresh: () async => setState(() {
+              _future = _service.getMyAdoptionRequests();
+            }),
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               itemCount: requests.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final req = requests[index];
-                return _ConversacionTile(request: req);
-              },
+              itemBuilder: (context, index) =>
+                  _ConversacionTile(request: requests[index]),
             ),
           );
         },
@@ -116,90 +112,81 @@ class _ConversacionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = AppColors.card(context);
+    final txtColor = AppColors.text(context);
+    final subColor = AppColors.textSub(context);
+
     return Material(
-      color: Colors.white,
+      color: cardColor,
       borderRadius: BorderRadius.circular(16),
-      elevation: 2,
+      elevation: isDark ? 0 : 2,
       shadowColor: AppColors.shadow,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ChatScreen(adoptionRequest: request),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              // Avatar mascota
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: _fotoUrl != null
-                    ? Image.network(
-                        _fotoUrl!,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _avatarFallback(),
-                      )
-                    : _avatarFallback(),
+      child: isDark
+          ? Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.darkDivider),
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 14),
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      request.mascota.nombre,
+              child: _buildContent(context, txtColor, subColor),
+            )
+          : _buildContent(context, txtColor, subColor),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, Color txtColor, Color subColor) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => Navigator.push(context,
+          MaterialPageRoute(builder: (_) => ChatScreen(adoptionRequest: request))),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _fotoUrl != null
+                  ? Image.network(_fotoUrl!, width: 56, height: 56, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _avatarFallback())
+                  : _avatarFallback(),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(request.mascota.nombre,
                       style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          color: AppColors.textDark),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Solicitud de adopción',
-                      style: GoogleFonts.poppins(
-                          fontSize: 12, color: AppColors.textMedium),
-                    ),
-                  ],
-                ),
+                          fontWeight: FontWeight.w600, fontSize: 15, color: txtColor)),
+                  const SizedBox(height: 2),
+                  Text('Solicitud de adopción',
+                      style: GoogleFonts.poppins(fontSize: 12, color: subColor)),
+                ],
               ),
-              // Estado
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _estadoColor(request.estado).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  request.estado,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: _estadoColor(request.estado).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(request.estado,
                   style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: _estadoColor(request.estado)),
-                ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(Icons.chevron_right, color: AppColors.textMedium),
-            ],
-          ),
+                      fontSize: 11, fontWeight: FontWeight.w600,
+                      color: _estadoColor(request.estado))),
+            ),
+            const SizedBox(width: 6),
+            Icon(Icons.chevron_right, color: subColor),
+          ],
         ),
       ),
     );
   }
 
-  Widget _avatarFallback() {
-    return Container(
-      width: 56,
-      height: 56,
+  Widget _avatarFallback() => Container(
+      width: 56, height: 56,
       color: AppColors.primary.withOpacity(0.1),
-      child: const Icon(Icons.pets, color: AppColors.primary, size: 28),
-    );
-  }
+      child: const Icon(Icons.pets, color: AppColors.primary, size: 28));
 
   Color _estadoColor(String estado) {
     switch (estado.toLowerCase()) {

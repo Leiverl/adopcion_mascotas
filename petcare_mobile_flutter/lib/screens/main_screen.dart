@@ -33,17 +33,12 @@ class _MainScreenState extends State<MainScreen> {
     _NavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Perfil'),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _screens),
       extendBody: true,
       bottomNavigationBar: _FloatingNavBar(
         selectedIndex: _selectedIndex,
@@ -74,17 +69,18 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final navBg = isDark ? AppColors.darkCard : Colors.white;
+    final shadowColor = isDark ? Colors.black54 : Colors.black.withOpacity(0.12);
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: navBg,
         borderRadius: BorderRadius.circular(28),
+        border: isDark ? Border.all(color: AppColors.darkDivider) : null,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: shadowColor, blurRadius: 24, offset: const Offset(0, 8)),
         ],
       ),
       child: Padding(
@@ -94,6 +90,7 @@ class _FloatingNavBar extends StatelessWidget {
           children: List.generate(items.length, (index) {
             final item = items[index];
             final isActive = index == selectedIndex;
+            final inactiveColor = isDark ? AppColors.darkTextMedium : AppColors.textMedium;
             return GestureDetector(
               onTap: () => onTap(index),
               behavior: HitTestBehavior.opaque,
@@ -102,9 +99,7 @@ class _FloatingNavBar extends StatelessWidget {
                 curve: Curves.easeInOut,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.primary.withOpacity(0.12)
-                      : Colors.transparent,
+                  color: isActive ? AppColors.primary.withOpacity(0.12) : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -113,16 +108,14 @@ class _FloatingNavBar extends StatelessWidget {
                     AnimatedScale(
                       scale: isActive ? 1.15 : 1.0,
                       duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
                       child: Icon(
                         isActive ? item.activeIcon : item.icon,
-                        color: isActive ? AppColors.primary : AppColors.textMedium,
+                        color: isActive ? AppColors.primary : inactiveColor,
                         size: 24,
                       ),
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
                       child: isActive
                           ? Padding(
                               padding: const EdgeInsets.only(left: 6),

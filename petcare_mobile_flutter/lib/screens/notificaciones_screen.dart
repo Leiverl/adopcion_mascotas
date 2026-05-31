@@ -9,54 +9,60 @@ class NotificacionesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use a Consumer to get the provider and rebuild when it changes
+    final bgColor = AppColors.bg(context);
+    final txtColor = AppColors.text(context);
+    final subColor = AppColors.textSub(context);
+
     return Consumer<NotificacionesProvider>(
       builder: (context, provider, child) {
         return Scaffold(
+          backgroundColor: bgColor,
           appBar: AppBar(
-            title: const Text('Notificaciones'),
-            backgroundColor: AppColors.background,
+            backgroundColor: bgColor,
+            title: Text('Notificaciones', style: TextStyle(color: txtColor)),
+            iconTheme: IconThemeData(color: txtColor),
             actions: [
               if (provider.unreadCount > 0)
                 TextButton(
                   onPressed: () => provider.markAllAsRead(),
                   child: const Text('Marcar todas como leídas'),
-                )
+                ),
             ],
           ),
           body: provider.isLoading
               ? const Center(child: CircularProgressIndicator())
               : provider.notificaciones.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'No tienes notificaciones.',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                        style: TextStyle(fontSize: 18, color: subColor),
                       ),
                     )
                   : ListView.builder(
                       itemCount: provider.notificaciones.length,
                       itemBuilder: (context, index) {
-                        final notificacion = provider.notificaciones[index];
+                        final n = provider.notificaciones[index];
                         return ListTile(
-                          leading: notificacion.leida
-                              ? const Icon(Icons.notifications_none, color: Colors.grey)
-                              : const Icon(Icons.notifications_active, color: AppColors.primary),
+                          leading: n.leida
+                              ? Icon(Icons.notifications_none, color: subColor)
+                              : const Icon(Icons.notifications_active,
+                                  color: AppColors.primary),
                           title: Text(
-                            notificacion.titulo,
+                            n.titulo,
                             style: TextStyle(
-                              fontWeight: notificacion.leida ? FontWeight.normal : FontWeight.bold,
+                              color: txtColor,
+                              fontWeight: n.leida
+                                  ? FontWeight.normal
+                                  : FontWeight.bold,
                             ),
                           ),
                           subtitle: Text(
-                            '${notificacion.cuerpo}\n${DateFormat('dd MMM, HH:mm').format(notificacion.fechaCreacion)}',
+                            '${n.cuerpo}\n${DateFormat('dd MMM, HH:mm').format(n.fechaCreacion)}',
+                            style: TextStyle(color: subColor),
                           ),
                           isThreeLine: true,
                           onTap: () {
-                            if (!notificacion.leida) {
-                              provider.markAsRead(notificacion.id);
-                            }
-                            // TODO: Implementar navegación a la ruta si existe
-                            // if (notificacion.ruta != null) { ... }
+                            if (!n.leida) provider.markAsRead(n.id);
                           },
                         );
                       },

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:petcare_mobile/models/evento.dart';
-import 'package:petcare_mobile/screens/eventos/evento_detail_screen.dart'; // <-- IMPORTAR
+import 'package:petcare_mobile/screens/eventos/evento_detail_screen.dart';
+import 'package:petcare_mobile/utils/app_colors.dart';
 
 class EventoCard extends StatelessWidget {
   final Evento evento;
@@ -9,20 +11,21 @@ class EventoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final subColor = AppColors.textSub(context);
+    final txtColor = AppColors.text(context);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      elevation: 5,
-      child: InkWell( // <-- ENVOLVEMOS CON INKWELL PARA EL EFECTO RIPPLE
-        onTap: () {
-          // Navegamos a la pantalla de detalle
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (ctx) => EventoDetailScreen(evento: evento),
-            ),
-          );
-        },
+      elevation: isDark ? 0 : 5,
+      color: AppColors.card(context),
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (ctx) => EventoDetailScreen(evento: evento)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -33,8 +36,9 @@ class EventoCard extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (ctx, err, stack) => Container(
                 height: 180,
-                color: Colors.grey[300],
-                child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 50),
+                color: isDark ? AppColors.darkSurface : Colors.grey[300],
+                child: Icon(Icons.image_not_supported,
+                    color: subColor, size: 50),
               ),
             ),
             Padding(
@@ -42,27 +46,32 @@ class EventoCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    evento.titulo,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
+                  Text(evento.titulo,
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: txtColor)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                      Icon(Icons.calendar_today, size: 16, color: subColor),
                       const SizedBox(width: 8),
                       Text(
                         '${DateFormat('dd MMMM, yyyy', 'es_ES').format(evento.fecha)} - ${evento.hora}',
-                        style: const TextStyle(color: Colors.grey),
+                        style: GoogleFonts.poppins(
+                            fontSize: 13, color: subColor),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                      Icon(Icons.location_on, size: 16, color: subColor),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(evento.ubicacion, style: const TextStyle(color: Colors.grey))),
+                      Expanded(
+                          child: Text(evento.ubicacion,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 13, color: subColor))),
                     ],
                   ),
                 ],

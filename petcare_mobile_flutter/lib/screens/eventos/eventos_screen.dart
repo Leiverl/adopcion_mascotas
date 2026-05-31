@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 class EventosScreen extends StatefulWidget {
   const EventosScreen({super.key});
-
   @override
   State<EventosScreen> createState() => _EventosScreenState();
 }
@@ -26,41 +25,36 @@ class _EventosScreenState extends State<EventosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = AppColors.bg(context);
+    final tabIndicatorColor = AppColors.primary;
+    final unselectedTab = isDark ? AppColors.darkTextMedium : Colors.grey;
+
     return DefaultTabController(
-      length: 2, // Dos pestañas: Próximos y Pasados
+      length: 2,
       child: Scaffold(
+        backgroundColor: bgColor,
         appBar: AppBar(
+          backgroundColor: bgColor,
           title: const Text('Eventos'),
-          backgroundColor: AppColors.background,
-          // --- INICIO DE LA MODIFICACIÓN ---
           actions: [
             Consumer<NotificacionesProvider>(
-              builder: (context, provider, child) {
-                return Badge(
-                  label: Text(provider.unreadCount.toString()),
-                  isLabelVisible: provider.unreadCount > 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => const NotificacionesScreen(),
-                      ));
-                    },
-                    tooltip: 'Notificaciones',
-                  ),
-                );
-              },
+              builder: (context, provider, child) => Badge(
+                label: Text(provider.unreadCount.toString()),
+                isLabelVisible: provider.unreadCount > 0,
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (ctx) => const NotificacionesScreen())),
+                ),
+              ),
             ),
           ],
-          // --- FIN DE LA MODIFICACIÓN ---
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'PRÓXIMOS'),
-              Tab(text: 'PASADOS'),
-            ],
-            labelColor: AppColors.primary,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: AppColors.primary,
+          bottom: TabBar(
+            tabs: const [Tab(text: 'PRÓXIMOS'), Tab(text: 'PASADOS')],
+            labelColor: tabIndicatorColor,
+            unselectedLabelColor: unselectedTab,
+            indicatorColor: tabIndicatorColor,
           ),
         ),
         body: FutureBuilder<List<Evento>>(
@@ -73,40 +67,34 @@ class _EventosScreenState extends State<EventosScreen> {
               return Center(child: Text('Error: ${snapshot.error}'));
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(
+              return Center(
                 child: Text('No hay eventos programados.',
-                    style: TextStyle(fontSize: 18, color: Colors.grey)),
+                    style: TextStyle(fontSize: 18, color: AppColors.textSub(context))),
               );
             }
-
             final hoy = DateTime.now();
             final eventos = snapshot.data!;
-            
-            final proximosEventos = eventos.where((e) => e.fecha.isAfter(hoy) || e.fecha.isAtSameMomentAs(hoy)).toList();
-            final eventosPasados = eventos.where((e) => e.fecha.isBefore(hoy)).toList();
-
-            return TabBarView(
-              children: [
-                _buildEventosList(proximosEventos, 'No hay eventos próximos.'),
-                _buildEventosList(eventosPasados, 'No hay eventos pasados.'),
-              ],
-            );
+            final proximos = eventos.where((e) => !e.fecha.isBefore(hoy)).toList();
+            final pasados = eventos.where((e) => e.fecha.isBefore(hoy)).toList();
+            return TabBarView(children: [
+              _buildList(proximos, 'No hay eventos próximos.', context),
+              _buildList(pasados, 'No hay eventos pasados.', context),
+            ]);
           },
         ),
       ),
     );
   }
 
-  Widget _buildEventosList(List<Evento> eventos, String noEventsMessage) {
+  Widget _buildList(List<Evento> eventos, String msg, BuildContext context) {
     if (eventos.isEmpty) {
       return Center(
-        child: Text(noEventsMessage,
-            style: const TextStyle(fontSize: 18, color: Colors.grey)),
+        child: Text(msg, style: TextStyle(fontSize: 18, color: AppColors.textSub(context))),
       );
     }
     return ListView.builder(
       itemCount: eventos.length,
-      itemBuilder: (ctx, index) => EventoCard(evento: eventos[index]),
+      itemBuilder: (ctx, i) => EventoCard(evento: eventos[i]),
     );
   }
 }

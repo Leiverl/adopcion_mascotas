@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:petcare_mobile/api/adoption_service.dart';
 import 'package:petcare_mobile/models/pet.dart';
 import 'package:petcare_mobile/utils/app_colors.dart';
@@ -17,37 +18,33 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
   bool _hasRequested = false;
 
   Future<void> _showAdoptionForm() async {
-   final Map<String, String>? formResponses = await showDialog(
+    final Map<String, String>? formResponses = await showDialog(
       context: context,
       builder: (ctx) => const AdoptionFormDialog(),
     );
-
-   if (formResponses != null) {
-      setState(() { _isLoading = true; });
+    if (formResponses != null) {
+      setState(() => _isLoading = true);
       try {
         await _adoptionService.createAdopcionRequest(
-          petId: widget.pet.id,
-          formResponses: formResponses,
-        );
-        
+            petId: widget.pet.id, formResponses: formResponses);
         if (mounted) {
           _showResultDialog(
             title: '¡Solicitud Enviada!',
-            content: 'El refugio ha recibido tu solicitud. Puedes ver el estado en "Mis Adopciones".',
+            content:
+                'El refugio ha recibido tu solicitud. Puedes ver el estado en "Mis Adopciones".',
           );
-          setState(() { _hasRequested = true; });
+          setState(() => _hasRequested = true);
         }
       } catch (e) {
         if (mounted) {
           _showResultDialog(
             title: 'Error',
-            content: 'Ocurrió un error. Es posible que ya hayas enviado una solicitud para esta mascota.',
+            content:
+                'Ocurrió un error. Es posible que ya hayas enviado una solicitud para esta mascota.',
           );
         }
       } finally {
-        if (mounted) {
-          setState(() { _isLoading = false; });
-        }
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
@@ -60,9 +57,8 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
         content: Text(content),
         actions: [
           TextButton(
-            child: const Text('Entendido'),
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
+              child: const Text('Entendido'),
+              onPressed: () => Navigator.of(ctx).pop()),
         ],
       ),
     );
@@ -70,36 +66,42 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = AppColors.bg(context);
+    final txtColor = AppColors.text(context);
+    final subColor = AppColors.textSub(context);
+
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text(widget.pet.nombre),
-        backgroundColor: AppColors.background,
+        title: Text(widget.pet.nombre,
+            style: TextStyle(color: txtColor)),
+        backgroundColor: bgColor,
+        iconTheme: IconThemeData(color: txtColor),
       ),
-      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Carrusel de Imágenes ---
             SizedBox(
               height: 300,
               child: PageView.builder(
-                itemCount: widget.pet.galeriaFotos.isNotEmpty ? widget.pet.galeriaFotos.length : 1,
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    widget.pet.galeriaFotos.isNotEmpty
-                        ? widget.pet.galeriaFotos[index]
-                        : 'https://via.placeholder.com/400x300',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Center(child: Icon(Icons.error, color: Colors.red, size: 50)),
-                  );
-                },
+                itemCount: widget.pet.galeriaFotos.isNotEmpty
+                    ? widget.pet.galeriaFotos.length
+                    : 1,
+                itemBuilder: (context, index) => Image.network(
+                  widget.pet.galeriaFotos.isNotEmpty
+                      ? widget.pet.galeriaFotos[index]
+                      : 'https://via.placeholder.com/400x300',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Center(
+                          child: Icon(Icons.error,
+                              color: Colors.red, size: 50)),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-
-            // --- Información Principal ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -107,23 +109,18 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
                 children: [
                   Text(
                     widget.pet.nombre,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
+                    style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: txtColor),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     widget.pet.raza,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    style: GoogleFonts.poppins(
+                        fontSize: 18, color: subColor),
                   ),
                   const SizedBox(height: 24),
-
-                  // --- Chips de Características ---
                   Wrap(
                     spacing: 8.0,
                     runSpacing: 8.0,
@@ -134,33 +131,31 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-
-                  // --- Descripción ---
-                  const Text(
+                  Text(
                     'Sobre mí',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
+                    style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: txtColor),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     widget.pet.descripcion,
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 16,
-                      height: 1.5, // Interlineado
-                      color: Colors.black54,
+                      height: 1.5,
+                      color: isDark
+                          ? AppColors.darkTextMedium
+                          : Colors.black54,
                     ),
                   ),
-                  const SizedBox(height: 20), // Espacio extra al final
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
           ],
         ),
       ),
-      // --- Botón de Adopción ---
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _isLoading
@@ -168,12 +163,12 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
             : ElevatedButton(
                 onPressed: _hasRequested ? null : _showAdoptionForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _hasRequested ? Colors.grey : AppColors.primary,
+                  backgroundColor:
+                      _hasRequested ? Colors.grey : AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text(
                   _hasRequested ? 'Solicitud Enviada' : '¡Adóptame!',
@@ -184,15 +179,12 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
     );
   }
 
-  // Widget auxiliar para crear los chips de información
   Widget _buildInfoChip(String text) {
     return Chip(
       label: Text(text),
       backgroundColor: AppColors.primary.withOpacity(0.1),
       labelStyle: const TextStyle(
-        color: AppColors.primary,
-        fontWeight: FontWeight.bold,
-      ),
+          color: AppColors.primary, fontWeight: FontWeight.bold),
     );
   }
 }
