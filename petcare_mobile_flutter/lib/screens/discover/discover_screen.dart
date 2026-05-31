@@ -20,7 +20,7 @@ class DiscoverScreen extends StatefulWidget {
 }
 
 class _DiscoverScreenState extends State<DiscoverScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late Future<List<Pet>> _petsFuture;
   final PetService _petService = PetService();
   final CardSwiperController _swiperController = CardSwiperController();
@@ -39,6 +39,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // ← escucha ciclo de vida
     _loadPets();
     _confettiController =
         ConfettiController(duration: const Duration(milliseconds: 600));
@@ -67,6 +68,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // ← limpiar observer
     _swiperController.dispose();
     _confettiController.dispose();
     _heartAnimController.dispose();
@@ -74,8 +76,17 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     super.dispose();
   }
 
+  // ── Recarga automática al volver a la app desde segundo plano ───────────
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadPets();
+    }
+  }
+
   void _loadPets() {
     setState(() {
+      _currentCardIndex = 0;
       _petsFuture = _petService.getPets(filters: _currentFilters);
     });
   }
@@ -130,7 +141,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     const navBarHeight = 76.0;
     final bottomPad = bottomInset + navBarHeight;
 
-    // ── Dark mode helpers ──────────────────────────────────────────────────
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = AppColors.bg(context);
     final txtColor = AppColors.text(context);
@@ -147,6 +157,12 @@ class _DiscoverScreenState extends State<DiscoverScreen>
         elevation: 0,
         iconTheme: IconThemeData(color: txtColor),
         actions: [
+          // ── Botón de recarga manual ─────────────────────────────────────
+          IconButton(
+            icon: Icon(Icons.refresh, color: txtColor),
+            onPressed: _loadPets,
+            tooltip: 'Recargar',
+          ),
           IconButton(
             icon: Icon(Icons.filter_list, color: txtColor),
             onPressed: _showFilterPanel,
@@ -171,120 +187,138 @@ class _DiscoverScreenState extends State<DiscoverScreen>
       body: Stack(
         alignment: Alignment.topCenter,
         children: [
-          FutureBuilder<List<Pet>>(
-            future: _petsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Center(
-                    child: Text('Error: ${snapshot.error}',
-                        style: TextStyle(color: subColor)));
-              }
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(
-                  child: Text('No hay mascotas con esos filtros.',
-                      style: TextStyle(fontSize: 18, color: subColor)),
-                );
-              }
+          // ── Pull-to-refresh ───────────────────────────────────────────
+          RefreshIndicator(
+            onRefresh: () async => _loadPets(),
+            color: AppColors.primary,
+            child: FutureBuilder<List<Pet>>(
+              future: _petsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                      child: Text('Error: ${snapshot.error}',
+                          style: TextStyle(color: subColor)));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  // Lista vacía scrolleable para que pull-to-refresh funcione
+                  return CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Text(
+                            'No hay mascotas disponibles.',
+                            style: TextStyle(fontSize: 18, color: subColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
 
-              final pets = snapshot.data!;
+                final pets = snapshot.data!;
 
-              Widget actionButtons({
-                bool showSkip = true,
-                required Pet currentPet,
-                required VoidCallback onInfo,
-              }) {
-                return Consumer<FavoritesProvider>(
-                  builder: (context, favProvider, _) {
-                    final isFav = favProvider.isFavorite(currentPet.id);
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: bottomPad, top: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          if (showSkip)
+                Widget actionButtons({
+                  bool showSkip = true,
+                  required Pet currentPet,
+                  required VoidCallback onInfo,
+                }) {
+                  return Consumer<FavoritesProvider>(
+                    builder: (context, favProvider, _) {
+                      final isFav = favProvider.isFavorite(currentPet.id);
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: bottomPad, top: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            if (showSkip)
+                              _ActionButton(
+                                icon: Icons.arrow_forward_rounded,
+                                color: Colors.orange,
+                                bgColor: actionBtnBg,
+                                shadowColor: actionBtnShadow,
+                                onPressed: () => _swiperController
+                                    .swipe(CardSwiperDirection.left),
+                              ),
                             _ActionButton(
-                              icon: Icons.arrow_forward_rounded,
-                              color: Colors.orange,
+                              icon: Icons.article_outlined,
+                              color: Colors.blueAccent,
                               bgColor: actionBtnBg,
                               shadowColor: actionBtnShadow,
-                              onPressed: () => _swiperController
-                                  .swipe(CardSwiperDirection.left),
+                              size: 28,
+                              onPressed: onInfo,
                             ),
-                          _ActionButton(
-                            icon: Icons.article_outlined,
-                            color: Colors.blueAccent,
-                            bgColor: actionBtnBg,
-                            shadowColor: actionBtnShadow,
-                            size: 28,
-                            onPressed: onInfo,
-                          ),
-                          _ActionButton(
-                            icon: isFav
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: isFav ? AppColors.primary : Colors.grey,
-                            bgColor: actionBtnBg,
-                            shadowColor: actionBtnShadow,
-                            onPressed: () => _onFavorite(currentPet, favProvider),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }
+                            _ActionButton(
+                              icon: isFav
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color:
+                                  isFav ? AppColors.primary : Colors.grey,
+                              bgColor: actionBtnBg,
+                              shadowColor: actionBtnShadow,
+                              onPressed: () =>
+                                  _onFavorite(currentPet, favProvider),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
 
-              if (pets.length == 1) {
-                final pet = pets[0];
+                if (pets.length == 1) {
+                  final pet = pets[0];
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                          child: PetCard(pet: pet),
+                        ),
+                      ),
+                      actionButtons(
+                        showSkip: false,
+                        currentPet: pet,
+                        onInfo: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => PetDetailScreen(pet: pet))),
+                      ),
+                    ],
+                  );
+                }
+
                 return Column(
                   children: [
                     Expanded(
-                      child: Padding(
+                      child: CardSwiper(
+                        controller: _swiperController,
+                        cardsCount: pets.length,
+                        onSwipe: (prev, current, direction) {
+                          setState(() => _currentCardIndex = current ?? 0);
+                          return true;
+                        },
                         padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                        child: PetCard(pet: pet),
+                        cardBuilder: (context, index, ht, vt) =>
+                            PetCard(pet: pets[index]),
                       ),
                     ),
                     actionButtons(
-                      showSkip: false,
-                      currentPet: pet,
-                      onInfo: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => PetDetailScreen(pet: pet))),
+                      currentPet: pets[_currentCardIndex],
+                      onInfo: () {
+                        if (_currentCardIndex < pets.length) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => PetDetailScreen(
+                                  pet: pets[_currentCardIndex])));
+                        }
+                      },
                     ),
                   ],
                 );
-              }
-
-              return Column(
-                children: [
-                  Expanded(
-                    child: CardSwiper(
-                      controller: _swiperController,
-                      cardsCount: pets.length,
-                      onSwipe: (prev, current, direction) {
-                        setState(() => _currentCardIndex = current ?? 0);
-                        return true;
-                      },
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                      cardBuilder: (context, index, ht, vt) =>
-                          PetCard(pet: pets[index]),
-                    ),
-                  ),
-                  actionButtons(
-                    currentPet: pets[_currentCardIndex],
-                    onInfo: () {
-                      if (_currentCardIndex < pets.length) {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => PetDetailScreen(
-                                pet: pets[_currentCardIndex])));
-                      }
-                    },
-                  ),
-                ],
-              );
-            },
+              },
+            ),
           ),
 
           if (_showHeartOverlay)
@@ -299,7 +333,9 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                       Icons.favorite,
                       color: AppColors.primary,
                       size: 120,
-                      shadows: [Shadow(color: Colors.black26, blurRadius: 20)],
+                      shadows: [
+                        Shadow(color: Colors.black26, blurRadius: 20)
+                      ],
                     ),
                   ),
                 ),
@@ -314,12 +350,20 @@ class _DiscoverScreenState extends State<DiscoverScreen>
             createParticlePath: (size) {
               final path = Path();
               path.moveTo(size.width / 2, size.height / 5);
-              path.cubicTo(size.width / 2, size.height / 5,
-                  size.width / 10, size.height / 2.5,
-                  size.width / 2, size.height);
-              path.cubicTo(size.width / 2, size.height,
-                  size.width - (size.width / 10), size.height / 2.5,
-                  size.width / 2, size.height / 5);
+              path.cubicTo(
+                  size.width / 2,
+                  size.height / 5,
+                  size.width / 10,
+                  size.height / 2.5,
+                  size.width / 2,
+                  size.height);
+              path.cubicTo(
+                  size.width / 2,
+                  size.height,
+                  size.width - (size.width / 10),
+                  size.height / 2.5,
+                  size.width / 2,
+                  size.height / 5);
               return path;
             },
           ),
@@ -419,7 +463,8 @@ class _TopToastState extends State<_TopToast>
             borderRadius: BorderRadius.circular(16),
             color: widget.isAdd ? AppColors.primary : Colors.blueGrey,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
