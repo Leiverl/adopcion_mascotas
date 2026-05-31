@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:petcare_mobile/providers/auth_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:petcare_mobile/providers/favorites_provider.dart';
+import 'package:petcare_mobile/providers/theme_provider.dart';
 import 'package:petcare_mobile/providers/user_provider.dart';
 import 'package:petcare_mobile/screens/auth_wrapper.dart';
 import 'package:petcare_mobile/utils/app_colors.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => InteraccionesProvider()),
@@ -41,113 +43,136 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = GoogleFonts.poppinsTextTheme();
+  // Construye el ThemeData a partir de la paleta y el brillo
+  ThemeData _buildTheme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    final textTheme = GoogleFonts.poppinsTextTheme(
+      isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme,
+    );
 
-    return MaterialApp(
-      title: 'PetCare',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-          surface: AppColors.surface,
-          error: AppColors.error,
-          brightness: Brightness.light,
+    final bg = isDark ? AppColors.darkBackground : AppColors.background;
+    final surf = isDark ? AppColors.darkSurface : AppColors.surface;
+    final cardColor = isDark ? AppColors.darkCard : AppColors.cardBg;
+    final txtDark = isDark ? AppColors.darkTextDark : AppColors.textDark;
+    final txtMed = isDark ? AppColors.darkTextMedium : AppColors.textMedium;
+    final div = isDark ? AppColors.darkDivider : AppColors.divider;
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: surf,
+        error: AppColors.error,
+        brightness: brightness,
+      ),
+      scaffoldBackgroundColor: bg,
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
+
+      appBarTheme: AppBarTheme(
+        backgroundColor: bg,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.poppins(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: txtDark,
         ),
-        scaffoldBackgroundColor: AppColors.background,
-        textTheme: textTheme,
-        primaryTextTheme: textTheme,
+        iconTheme: IconThemeData(color: txtDark),
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+      ),
 
-        appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.background,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           elevation: 0,
-          scrolledUnderElevation: 0,
-          centerTitle: false,
-          titleTextStyle: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textDark,
-          ),
-          iconTheme: const IconThemeData(color: AppColors.textDark),
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
-        ),
-
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.textLight,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            textStyle: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            side: const BorderSide(color: AppColors.primary, width: 1.5),
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            textStyle: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: AppColors.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.divider),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.divider),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-          ),
-          labelStyle: GoogleFonts.poppins(color: AppColors.textMedium),
-          hintStyle: GoogleFonts.poppins(color: AppColors.textMedium),
-        ),
-
-        cardTheme: CardThemeData(
-          color: AppColors.cardBg,
-          elevation: 4,
-          shadowColor: AppColors.shadow,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-
-        chipTheme: ChipThemeData(
-          backgroundColor: AppColors.background,
-          selectedColor: AppColors.primary.withOpacity(0.15),
-          labelStyle: GoogleFonts.poppins(fontSize: 13),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+              borderRadius: BorderRadius.circular(16)),
+          textStyle: GoogleFonts.poppins(
+              fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
-      home: const AuthWrapper(),
+
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16)),
+          textStyle: GoogleFonts.poppins(
+              fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surf,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: div),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: div),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide:
+              const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        labelStyle: GoogleFonts.poppins(color: txtMed),
+        hintStyle: GoogleFonts.poppins(color: txtMed),
+      ),
+
+      cardTheme: CardThemeData(
+        color: cardColor,
+        elevation: isDark ? 0 : 4,
+        shadowColor: isDark ? Colors.transparent : AppColors.shadow,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: surf,
+        selectedColor: AppColors.primary.withOpacity(0.15),
+        labelStyle: GoogleFonts.poppins(fontSize: 13),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+      ),
+
+      dividerColor: div,
+      dividerTheme: DividerThemeData(color: div),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return MaterialApp(
+          title: 'PetCare',
+          debugShowCheckedModeBanner: false,
+          theme: _buildTheme(Brightness.light),
+          darkTheme: _buildTheme(Brightness.dark),
+          themeMode: themeProvider.themeMode,
+          home: const AuthWrapper(),
+        );
+      },
     );
   }
 }
