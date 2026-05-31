@@ -2,11 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as admin from 'firebase-admin';
-import * as path from 'path';
-import * as fs from 'fs';
 import { Notificacion } from './schemas/notificacion.schema';
 import { Usuario } from '../usuarios/schemas/usuario.schema';
-import { Evento } from '../eventos/schemas/evento.schema';
 import { InteraccionEvento } from '../interacciones-eventos/schemas/interaccion-evento.schema';
 
 @Injectable()
@@ -18,21 +15,27 @@ export class NotificationsService {
     @InjectModel(Usuario.name) private usuarioModel: Model<Usuario>,
     @InjectModel(InteraccionEvento.name) private interaccionModel: Model<InteraccionEvento>,
   ) {
-    const serviceAccountPath = path.join(process.cwd(), 'firebase-service-account.json');
-    if (fs.existsSync(serviceAccountPath)) {
-      if (admin.apps.length === 0) {
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccountPath),
-        });
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+    if (serviceAccountJson) {
+      try {
+        if (admin.apps.length === 0) {
+          const serviceAccount = JSON.parse(serviceAccountJson);
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+          });
+        }
+        this.firebaseEnabled = true;
+        console.log('[Firebase] Inicializado correctamente desde variable de entorno.');
+      } catch (e) {
+        console.error('[Firebase] Error al parsear FIREBASE_SERVICE_ACCOUNT:', e);
       }
-      this.firebaseEnabled = true;
-      console.log('[Firebase] Inicializado correctamente.');
     } else {
-      console.warn('[Firebase] ADVERTENCIA: firebase-service-account.json no encontrado. Las notificaciones push están desactivadas.');
+      console.warn('[Firebase] ADVERTENCIA: FIREBASE_SERVICE_ACCOUNT no definida. Push desactivado.');
     }
   }
 
-  async createAndSend(payload: { userId: string, title: string, body: string, route?: string }) {
+  async createAndSend(payload: { userId: string; title: string; body: string; route?: string }) {
     const notificacionGuardada = await new this.notificacionModel({
       usuario: payload.userId,
       titulo: payload.title,
@@ -46,9 +49,14 @@ export class NotificationsService {
         const message: admin.messaging.MulticastMessage = {
           tokens: targetUser.fcmTokens,
           notification: { title: payload.title, body: payload.body },
-          data: { route: payload.route || '' }
+          data: { route: payload.route || '' },
         };
-        await admin.messaging().sendEachForMulticast(message);
+        try {
+          const result = await admin.messaging().sendEachForMulticast(message);
+          console.log(`[Firebase] Push enviado: ${result.successCount} éxitos, ${result.failureCount} fallos.`);
+        } catch (e) {
+          console.error('[Firebase] Error enviando push:', e);
+        }
       }
     }
 
@@ -67,7 +75,7 @@ export class NotificationsService {
         userId: userId.toString(),
         title: titulo,
         body: cuerpo,
-        route: `/tabs/events/${eventoId}`
+        route: `/tabs/events/${eventoId}`,
       });
     }
     return { message: `Notificaciones enviadas a ${userIds.length} usuarios.` };
@@ -84,7 +92,7 @@ export class NotificationsService {
   async markAsRead(id: string, userId: string) {
     const result = await this.notificacionModel.updateOne(
       { _id: id, usuario: userId },
-      { leida: true }
+      { leida: true },
     );
     if (result.modifiedCount === 0) throw new NotFoundException('Notificación no encontrada.');
     return { message: 'Notificación marcada como leída.' };
@@ -93,7 +101,7 @@ export class NotificationsService {
   async markAllAsRead(userId: string) {
     await this.notificacionModel.updateMany(
       { usuario: userId, leida: false },
-      { leida: true }
+      { leida: true },
     );
     return { message: 'Todas las notificaciones marcadas como leídas.' };
   }
