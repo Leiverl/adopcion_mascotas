@@ -26,13 +26,11 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   final CardSwiperController _swiperController = CardSwiperController();
   late ConfettiController _confettiController;
 
-  // Animación de corazón flotante
   late AnimationController _heartAnimController;
   late Animation<double> _heartScale;
   late Animation<double> _heartOpacity;
   bool _showHeartOverlay = false;
 
-  // Toast superior
   OverlayEntry? _toastEntry;
 
   int _currentCardIndex = 0;
@@ -44,7 +42,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     _loadPets();
     _confettiController =
         ConfettiController(duration: const Duration(milliseconds: 600));
-
     _heartAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -54,8 +51,8 @@ class _DiscoverScreenState extends State<DiscoverScreen>
       TweenSequenceItem(tween: Tween(begin: 1.4, end: 1.0), weight: 20),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 20),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
-    ]).animate(CurvedAnimation(
-        parent: _heartAnimController, curve: Curves.easeInOut));
+    ]).animate(
+        CurvedAnimation(parent: _heartAnimController, curve: Curves.easeInOut));
     _heartOpacity = TweenSequence([
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 20),
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 60),
@@ -100,43 +97,33 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     }
   }
 
-  // ── Toast superior rápido ─────────────────────────────────────────────
   void _showTopToast(String message, {bool isAdd = true}) {
     _toastEntry?.remove();
     _toastEntry = null;
-
     final entry = OverlayEntry(
       builder: (context) => _TopToast(message: message, isAdd: isAdd),
     );
     _toastEntry = entry;
     Overlay.of(context).insert(entry);
-
     Future.delayed(const Duration(milliseconds: 1800), () {
       entry.remove();
       if (_toastEntry == entry) _toastEntry = null;
     });
   }
 
-  // ── Lógica de favorito con animaciones ───────────────────────────────
   Future<void> _onFavorite(Pet pet, FavoritesProvider provider) async {
     final bool isAdding = !provider.isFavorite(pet.id);
     if (isAdding) {
-      // Animación corazón flotante
       setState(() => _showHeartOverlay = true);
       _heartAnimController.forward(from: 0);
       _confettiController.play();
     }
     final message = await provider.toggleFavorite(pet);
-    if (mounted) {
-      _showTopToast(message, isAdd: isAdding);
-    }
+    if (mounted) _showTopToast(message, isAdd: isAdding);
   }
 
   @override
   Widget build(BuildContext context) {
-    final favoritesProvider =
-        Provider.of<FavoritesProvider>(context, listen: false);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Descubrir Mascotas'),
@@ -155,11 +142,9 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                 isLabelVisible: provider.unreadCount > 0,
                 child: IconButton(
                   icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (ctx) => const NotificacionesScreen(),
-                    ));
-                  },
+                  onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (ctx) => const NotificacionesScreen())),
                   tooltip: 'Notificaciones',
                 ),
               );
@@ -189,44 +174,59 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
               final pets = snapshot.data!;
 
-              // ── Botones de acción compartidos ─────────────────────
+              // ── Botones — usa Consumer para leer isFavorite reactivamente ──
               Widget actionButtons({
-                bool showClose = true,
+                bool showSkip = true,
+                required Pet currentPet,
                 required VoidCallback onInfo,
-                required VoidCallback onFav,
               }) {
-                return SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 96, top: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        if (showClose)
-                          _ActionButton(
-                            icon: Icons.close,
-                            color: Colors.redAccent,
-                            onPressed: () => _swiperController
-                                .swipe(CardSwiperDirection.left),
-                          ),
-                        _ActionButton(
-                          icon: Icons.article_outlined,
-                          color: Colors.blueAccent,
-                          size: 28,
-                          onPressed: onInfo,
+                return Consumer<FavoritesProvider>(
+                  builder: (context, favProvider, _) {
+                    final isFav = favProvider.isFavorite(currentPet.id);
+                    return SafeArea(
+                      top: false,
+                      child: Padding(
+                        // ↑ más espacio arriba para que los botones bajen
+                        padding:
+                            const EdgeInsets.only(bottom: 96, top: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Botón SKIP (flecha adelante)
+                            if (showSkip)
+                              _ActionButton(
+                                icon: Icons.arrow_forward_rounded,
+                                color: Colors.orange,
+                                onPressed: () => _swiperController
+                                    .swipe(CardSwiperDirection.left),
+                              ),
+                            // Botón INFO
+                            _ActionButton(
+                              icon: Icons.article_outlined,
+                              color: Colors.blueAccent,
+                              size: 28,
+                              onPressed: onInfo,
+                            ),
+                            // Botón FAVORITO — outline si no es fav, relleno si sí
+                            _ActionButton(
+                              icon: isFav
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFav
+                                  ? AppColors.primary
+                                  : Colors.grey,
+                              onPressed: () =>
+                                  _onFavorite(currentPet, favProvider),
+                            ),
+                          ],
                         ),
-                        _ActionButton(
-                          icon: Icons.favorite,
-                          color: AppColors.primary,
-                          onPressed: onFav,
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
               }
 
-              // ── Caso: una sola mascota ─────────────────────────────
+              // ── Caso: una sola mascota ────────────────────────────
               if (pets.length == 1) {
                 final pet = pets[0];
                 return Column(
@@ -238,11 +238,11 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                       ),
                     ),
                     actionButtons(
-                      showClose: false,
+                      showSkip: false,
+                      currentPet: pet,
                       onInfo: () => Navigator.of(context).push(
                           MaterialPageRoute(
                               builder: (_) => PetDetailScreen(pet: pet))),
-                      onFav: () => _onFavorite(pet, favoritesProvider),
                     ),
                   ],
                 );
@@ -265,6 +265,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                     ),
                   ),
                   actionButtons(
+                    currentPet: pets[_currentCardIndex],
                     onInfo: () {
                       if (_currentCardIndex < pets.length) {
                         Navigator.of(context).push(MaterialPageRoute(
@@ -272,15 +273,13 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                                 pet: pets[_currentCardIndex])));
                       }
                     },
-                    onFav: () => _onFavorite(
-                        pets[_currentCardIndex], favoritesProvider),
                   ),
                 ],
               );
             },
           ),
 
-          // ── Corazón flotante animado ────────────────────────────────
+          // ── Corazón flotante animado ──────────────────────────────
           if (_showHeartOverlay)
             Center(
               child: AnimatedBuilder(
@@ -293,19 +292,14 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                       Icons.favorite,
                       color: AppColors.primary,
                       size: 120,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          blurRadius: 20,
-                        )
-                      ],
+                      shadows: [Shadow(color: Colors.black26, blurRadius: 20)],
                     ),
                   ),
                 ),
               ),
             ),
 
-          // ── Confetti ───────────────────────────────────────────────
+          // ── Confetti ─────────────────────────────────────────────
           ConfettiWidget(
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
@@ -315,8 +309,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
               final path = Path();
               path.moveTo(size.width / 2, size.height / 5);
               path.cubicTo(size.width / 2, size.height / 5,
-                  size.width / 10, size.height / 2.5,
-                  size.width / 2, size.height);
+                  size.width / 10, size.height / 2.5, size.width / 2, size.height);
               path.cubicTo(size.width / 2, size.height,
                   size.width - (size.width / 10), size.height / 2.5,
                   size.width / 2, size.height / 5);
@@ -368,7 +361,7 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-// ── Toast superior ────────────────────────────────────────────────────────
+// ── Toast superior ──────────────────────────────────────────────────────
 class _TopToast extends StatefulWidget {
   final String message;
   final bool isAdd;
@@ -389,10 +382,8 @@ class _TopToastState extends State<_TopToast>
     super.initState();
     _ctrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 300));
-    _slide = Tween<Offset>(
-      begin: const Offset(0, -1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _slide = Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     _fade = Tween<double>(begin: 0, end: 1)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     _ctrl.forward();
@@ -419,8 +410,7 @@ class _TopToastState extends State<_TopToast>
             borderRadius: BorderRadius.circular(16),
             color: widget.isAdd ? AppColors.primary : Colors.blueGrey,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
