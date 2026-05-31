@@ -7,7 +7,7 @@ class AdoptionRequest {
   final String estado;
   final DateTime fechaCreacion;
   final String? urlPdfCertificado;
-  final Conversacion? conversacion; // <-- AÑADIR ESTE CAMPO
+  final Conversacion? conversacion;
 
   AdoptionRequest({
     required this.id,
@@ -15,20 +15,49 @@ class AdoptionRequest {
     required this.estado,
     required this.fechaCreacion,
     this.urlPdfCertificado,
-    this.conversacion, // <-- AÑADIR AL CONSTRUCTOR
+    this.conversacion,
   });
 
   factory AdoptionRequest.fromJson(Map<String, dynamic> json) {
+    // 'mascota' puede llegar populada (Map) o solo como ID (String)
+    Pet parsedMascota;
+    final mascotaRaw = json['mascota'];
+    if (mascotaRaw is Map<String, dynamic>) {
+      parsedMascota = Pet.fromJson(mascotaRaw);
+    } else {
+      // Solo tenemos el ID, creamos un objeto mínimo
+      parsedMascota = Pet(
+        id: mascotaRaw?.toString() ?? '',
+        nombre: 'Mascota',
+        especie: '',
+        raza: '',
+        edad: 0,
+        sexo: '',
+        tamano: '',
+        descripcion: '',
+        galeriaFotos: [],
+        refugioId: '',
+      );
+    }
+
+    // 'conversacion' puede llegar populada (Map) o solo como ID (String)
+    Conversacion? parsedConversacion;
+    final convRaw = json['conversacion'];
+    if (convRaw is Map<String, dynamic>) {
+      try {
+        parsedConversacion = Conversacion.fromJson(convRaw);
+      } catch (_) {
+        parsedConversacion = null;
+      }
+    }
+
     return AdoptionRequest(
-      id: json['_id'],
-      mascota: Pet.fromJson(json['mascota']),
-      estado: json['estado'] ?? 'DESCONOCIDO',
-      fechaCreacion: DateTime.parse(json['createdAt']),
-      urlPdfCertificado: json['urlPdfCertificado'],
-      // Si la conversación existe en el JSON, la creamos
-      conversacion: json['conversacion'] != null
-          ? Conversacion.fromJson(json['conversacion'])
-          : null,
+      id: (json['_id'] ?? '').toString(),
+      mascota: parsedMascota,
+      estado: (json['estado'] ?? 'DESCONOCIDO').toString(),
+      fechaCreacion: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      urlPdfCertificado: json['urlPdfCertificado']?.toString(),
+      conversacion: parsedConversacion,
     );
   }
 }

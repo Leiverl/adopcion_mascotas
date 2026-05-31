@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:petcare_mobile/api/adoption_service.dart';
 import 'package:petcare_mobile/models/adoption_request.dart';
 import 'package:petcare_mobile/screens/chat/chat_screen.dart';
@@ -20,7 +21,13 @@ class _MyAdoptionsScreenState extends State<MyAdoptionsScreen> {
   @override
   void initState() {
     super.initState();
-    _requestsFuture = _adoptionService.getMyAdoptionRequests();
+    _load();
+  }
+
+  void _load() {
+    setState(() {
+      _requestsFuture = _adoptionService.getMyAdoptionRequests();
+    });
   }
 
   Future<void> _launchURL(String? urlString) async {
@@ -38,146 +45,248 @@ class _MyAdoptionsScreenState extends State<MyAdoptionsScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo abrir el enlace: $urlString')),
+          SnackBar(content: Text('No se pudo abrir el enlace.')),
         );
       }
     }
   }
 
-  Color _getStatusColor(String status) {
+  Color _statusColor(String status) {
     switch (status) {
-      case 'APROBADA':
-        return Colors.green;
-      case 'EN_REVISION':
-        return Colors.orange;
-      case 'RECHAZADA':
-        return Colors.red;
-      case 'NUEVA':
-      default:
-        return Colors.blue;
+      case 'APROBADA': return Colors.green;
+      case 'EN_REVISION': return Colors.orange;
+      case 'RECHAZADA': return Colors.red;
+      default: return Colors.blue;
+    }
+  }
+
+  IconData _statusIcon(String status) {
+    switch (status) {
+      case 'APROBADA': return Icons.check_circle;
+      case 'EN_REVISION': return Icons.hourglass_empty;
+      case 'RECHAZADA': return Icons.cancel;
+      default: return Icons.fiber_new;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Solicitudes de Adopción'),
-        backgroundColor: AppColors.background,
-      ),
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        title: Text('Mis Solicitudes',
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w700, fontSize: 20)),
+      ),
       body: FutureBuilder<List<AdoptionRequest>>(
         future: _requestsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+
+          // ── Error con botón reintentar ─────────────────────────────
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.wifi_off_rounded,
+                        size: 64, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text('No se pudieron cargar tus solicitudes',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                            fontSize: 15, color: AppColors.textMedium)),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: _load,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Reintentar'),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
+
+          // ── Sin datos ──────────────────────────────────────────
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text(
-                'Aún no has enviado ninguna solicitud.',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.pets,
+                      size: 72, color: Colors.grey.shade300),
+                  const SizedBox(height: 16),
+                  Text('Aún no has enviado solicitudes',
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, color: AppColors.textMedium)),
+                ],
               ),
             );
           }
 
           final requests = snapshot.data!;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: requests.length,
-            itemBuilder: (context, index) {
-              final request = requests[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+          return RefreshIndicator(
+            onRefresh: () async => _load(),
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              itemCount: requests.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final r = requests[index];
+                final fotoUrl = r.mascota.galeriaFotos.isNotEmpty
+                    ? r.mascota.galeriaFotos[0]
+                    : null;
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
+                  ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(
-                              request.mascota.galeriaFotos.isNotEmpty
-                                  ? request.mascota.galeriaFotos[0]
-                                  : 'https://via.placeholder.com/150',
+                      // ── Info principal ──────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            // Foto
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: fotoUrl != null
+                                  ? Image.network(
+                                      fotoUrl,
+                                      width: 64, height: 64,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          _photoPlaceholder(),
+                                    )
+                                  : _photoPlaceholder(),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  request.mascota.nombre,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(r.mascota.nombre,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textDark)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Enviada el ${DateFormat('dd/MM/yyyy').format(r.fechaCreacion)}',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        color: AppColors.textMedium),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Solicitud enviada: ${DateFormat('dd/MM/yyyy').format(request.fechaCreacion)}',
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
+                                ],
+                              ),
+                            ),
+                            // Badge estado
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: _statusColor(r.estado)
+                                    .withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(_statusIcon(r.estado),
+                                      size: 13,
+                                      color: _statusColor(r.estado)),
+                                  const SizedBox(width: 4),
+                                  Text(r.estado,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: _statusColor(r.estado))),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // ── Acciones ────────────────────────────────────
+                      if (r.conversacion != null ||
+                          r.estado == 'APROBADA') ...
+                        [
+                          const Divider(height: 1),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                if (r.conversacion != null)
+                                  TextButton.icon(
+                                    icon: const Icon(
+                                        Icons.chat_bubble_outline,
+                                        size: 16),
+                                    label: Text('Chat',
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 12)),
+                                    onPressed: () =>
+                                        Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => ChatScreen(
+                                            adoptionRequest: r),
+                                      ),
+                                    ),
+                                  ),
+                                if (r.estado == 'APROBADA')
+                                  TextButton.icon(
+                                    icon: const Icon(
+                                        Icons.download_for_offline,
+                                        size: 16),
+                                    label: Text('Certificado',
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 12)),
+                                    style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            AppColors.primary),
+                                    onPressed: () =>
+                                        _launchURL(r.urlPdfCertificado),
+                                  ),
                               ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(request.estado),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              request.estado,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
                         ],
-                      ),
-                      const Divider(height: 20, thickness: 1),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          if (request.conversacion != null)
-                            TextButton.icon(
-                              icon: const Icon(Icons.chat_bubble_outline),
-                              label: const Text('Abrir Chat'),
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (ctx) =>
-                                      ChatScreen(adoptionRequest: request),
-                                ));
-                              },
-                            ),
-                          if (request.estado == 'APROBADA')
-                            TextButton.icon(
-                              icon: const Icon(Icons.download_for_offline),
-                              label: const Text('Certificado'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                              ),
-                              onPressed: () =>
-                                  _launchURL(request.urlPdfCertificado),
-                            ),
-                        ],
-                      ),
                     ],
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),
     );
   }
+
+  Widget _photoPlaceholder() => Container(
+        width: 64, height: 64,
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.pets, color: AppColors.primary, size: 28),
+      );
 }

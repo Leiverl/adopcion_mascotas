@@ -21,10 +21,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Intentar cargar perfil desde API (enriquece con datos frescos)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false).fetchProfile();
+      if (mounted) {
+        Provider.of<UserProvider>(context, listen: false).fetchProfile();
+      }
     });
+  }
+
+  void _logout() {
+    // Limpiar todos los providers antes de cerrar sesión
+    Provider.of<UserProvider>(context, listen: false).clear();
+    Provider.of<FavoritesProvider>(context, listen: false).clear();
+    // El AuthProvider dispara la navegación via AuthWrapper
+    Provider.of<AuthProvider>(context, listen: false).logout();
   }
 
   @override
@@ -59,10 +68,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, userProvider, favProvider, _) {
           final apiProfile = userProvider.profile;
           final favsCount = favProvider.favoritePets.length;
-
-          // Prioridad: datos de la API -> datos del JWT -> fallback
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
+
           final nombre = apiProfile?.nombre ??
               authProvider.userNombre ??
               'Usuario';
@@ -73,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
             children: [
-              // ── Header ─────────────────────────────────────────────
+              // ── Header ──────────────────────────────────────
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -104,25 +112,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                nombre,
-                                style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textDark),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                correo,
-                                style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: AppColors.textMedium),
-                              ),
-                            ],
-                          ),
+                          child: userProvider.isLoading
+                              ? _LoadingName()
+                              : Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nombre,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textDark),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      correo,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          color: AppColors.textMedium),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ],
                     ),
@@ -180,15 +191,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: 'Cerrar Sesión',
                 subtitle: 'Salir de tu cuenta',
                 danger: true,
-                onTap: () {
-                  Provider.of<UserProvider>(context, listen: false).clear();
-                  Provider.of<AuthProvider>(context, listen: false).logout();
-                },
+                onTap: _logout,
               ),
             ],
           );
         },
       ),
+    );
+  }
+}
+
+class _LoadingName extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+            width: 120, height: 14,
+            decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8))),
+        const SizedBox(height: 6),
+        Container(
+            width: 180, height: 11,
+            decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8))),
+      ],
     );
   }
 }

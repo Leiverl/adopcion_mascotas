@@ -10,42 +10,54 @@ class FavoritesProvider with ChangeNotifier {
   List<Pet> get favoritePets => _favoritePets;
   bool get isLoading => _isLoading;
 
-  FavoritesProvider() {
-    fetchFavorites();
-  }
-
-  Future<void> fetchFavorites() async {
+  Future<void> loadFavorites() async {
     _isLoading = true;
     notifyListeners();
     try {
       _favoritePets = await _favoritesService.getFavorites();
     } catch (e) {
-      print(e);
+      debugPrint('FavoritesProvider error: $e');
     }
     _isLoading = false;
     notifyListeners();
   }
 
-  bool isFavorite(String petId) {
-    return _favoritePets.any((pet) => pet.id == petId);
-  }
-
-  // --- MÉTODO MODIFICADO ---
-  Future<String> toggleFavorite(Pet pet) async {
-    final isCurrentlyFavorite = isFavorite(pet.id);
-    String message;
-
-    if (isCurrentlyFavorite) {
+  Future<void> toggleFavorite(Pet pet) async {
+    final isFav = isFavorite(pet.id);
+    // Optimistic update
+    if (isFav) {
       _favoritePets.removeWhere((p) => p.id == pet.id);
-      await _favoritesService.removeFavorite(pet.id);
-      message = 'Eliminado de favoritos';
     } else {
       _favoritePets.add(pet);
-      await _favoritesService.addFavorite(pet.id);
-      message = '¡Añadido a favoritos!';
     }
-    
     notifyListeners();
-    return message;
+
+    try {
+      if (isFav) {
+        await _favoritesService.removeFavorite(pet.id);
+      } else {
+        await _favoritesService.addFavorite(pet.id);
+      }
+    } catch (e) {
+      // Revertir si falla
+      if (isFav) {
+        _favoritePets.add(pet);
+      } else {
+        _favoritePets.removeWhere((p) => p.id == pet.id);
+      }
+      notifyListeners();
+      debugPrint('FavoritesProvider toggleFavorite error: $e');
+    }
+  }
+
+  bool isFavorite(String petId) {
+    return _favoritePets.any((p) => p.id == petId);
+  }
+
+  /// Limpia los favoritos al cerrar sesión
+  void clear() {
+    _favoritePets = [];
+    _isLoading = false;
+    notifyListeners();
   }
 }
