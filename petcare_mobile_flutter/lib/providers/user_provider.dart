@@ -5,18 +5,22 @@ class UserProvider with ChangeNotifier {
   final UserService _userService = UserService();
   UserProfile? _profile;
   bool _isLoading = false;
+  String? _error;
 
   UserProfile? get profile => _profile;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
+  /// Siempre recarga desde la API (no cachea para evitar datos vacíos)
   Future<void> fetchProfile() async {
-    if (_profile != null) return; // ya cargado, no repetir
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _profile = await _userService.getMyProfile();
     } catch (e) {
-      debugPrint('UserProvider error: $e');
+      _error = e.toString();
+      debugPrint('UserProvider error: $_error');
     }
     _isLoading = false;
     notifyListeners();
@@ -24,6 +28,7 @@ class UserProvider with ChangeNotifier {
 
   void clear() {
     _profile = null;
+    _error = null;
     notifyListeners();
   }
 }
