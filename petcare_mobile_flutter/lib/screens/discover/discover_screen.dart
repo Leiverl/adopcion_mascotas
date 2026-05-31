@@ -118,7 +118,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
       _heartAnimController.forward(from: 0);
       _confettiController.play();
     }
-    // toggleFavorite ahora retorna String con el mensaje
     final String message = await provider.toggleFavorite(pet);
     if (mounted) {
       _showTopToast(message, isAdd: isAdding);
@@ -131,14 +130,25 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     const navBarHeight = 76.0;
     final bottomPad = bottomInset + navBarHeight;
 
+    // ── Dark mode helpers ──────────────────────────────────────────────────
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = AppColors.bg(context);
+    final txtColor = AppColors.text(context);
+    final subColor = AppColors.textSub(context);
+    final actionBtnBg = isDark ? AppColors.darkCard : Colors.white;
+    final actionBtnShadow =
+        isDark ? Colors.black54 : Colors.grey.withOpacity(0.4);
+
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Descubrir Mascotas'),
-        backgroundColor: AppColors.background,
+        title: Text('Descubrir Mascotas', style: TextStyle(color: txtColor)),
+        backgroundColor: bgColor,
         elevation: 0,
+        iconTheme: IconThemeData(color: txtColor),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Icon(Icons.filter_list, color: txtColor),
             onPressed: _showFilterPanel,
             tooltip: 'Filtrar',
           ),
@@ -148,10 +158,9 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                 label: Text(provider.unreadCount.toString()),
                 isLabelVisible: provider.unreadCount > 0,
                 child: IconButton(
-                  icon: const Icon(Icons.notifications_outlined),
-                  onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (ctx) => const NotificacionesScreen())),
+                  icon: Icon(Icons.notifications_outlined, color: txtColor),
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (ctx) => const NotificacionesScreen())),
                   tooltip: 'Notificaciones',
                 ),
               );
@@ -159,7 +168,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
           ),
         ],
       ),
-      backgroundColor: AppColors.background,
       body: Stack(
         alignment: Alignment.topCenter,
         children: [
@@ -170,12 +178,14 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
+                return Center(
+                    child: Text('Error: ${snapshot.error}',
+                        style: TextStyle(color: subColor)));
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text('No hay mascotas con esos filtros.',
-                      style: TextStyle(fontSize: 18, color: Colors.grey)),
+                      style: TextStyle(fontSize: 18, color: subColor)),
                 );
               }
 
@@ -190,10 +200,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                   builder: (context, favProvider, _) {
                     final isFav = favProvider.isFavorite(currentPet.id);
                     return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: bottomPad,
-                        top: 12,
-                      ),
+                      padding: EdgeInsets.only(bottom: bottomPad, top: 12),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -201,12 +208,16 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                             _ActionButton(
                               icon: Icons.arrow_forward_rounded,
                               color: Colors.orange,
+                              bgColor: actionBtnBg,
+                              shadowColor: actionBtnShadow,
                               onPressed: () => _swiperController
                                   .swipe(CardSwiperDirection.left),
                             ),
                           _ActionButton(
                             icon: Icons.article_outlined,
                             color: Colors.blueAccent,
+                            bgColor: actionBtnBg,
+                            shadowColor: actionBtnShadow,
                             size: 28,
                             onPressed: onInfo,
                           ),
@@ -214,10 +225,10 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                             icon: isFav
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color:
-                                isFav ? AppColors.primary : Colors.grey,
-                            onPressed: () =>
-                                _onFavorite(currentPet, favProvider),
+                            color: isFav ? AppColors.primary : Colors.grey,
+                            bgColor: actionBtnBg,
+                            shadowColor: actionBtnShadow,
+                            onPressed: () => _onFavorite(currentPet, favProvider),
                           ),
                         ],
                       ),
@@ -239,9 +250,8 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                     actionButtons(
                       showSkip: false,
                       currentPet: pet,
-                      onInfo: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (_) => PetDetailScreen(pet: pet))),
+                      onInfo: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => PetDetailScreen(pet: pet))),
                     ),
                   ],
                 );
@@ -322,12 +332,16 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
+  final Color bgColor;
+  final Color shadowColor;
   final VoidCallback onPressed;
   final double size;
 
   const _ActionButton({
     required this.icon,
     required this.color,
+    required this.bgColor,
+    required this.shadowColor,
     required this.onPressed,
     this.size = 36,
   });
@@ -337,10 +351,10 @@ class _ActionButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white,
+        color: bgColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.4),
+            color: shadowColor,
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -405,8 +419,7 @@ class _TopToastState extends State<_TopToast>
             borderRadius: BorderRadius.circular(16),
             color: widget.isAdd ? AppColors.primary : Colors.blueGrey,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
