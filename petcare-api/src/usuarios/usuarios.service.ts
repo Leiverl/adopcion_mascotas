@@ -32,9 +32,6 @@ export class UsuariosService {
     return nuevoUsuario.save();
   }
 
-  // --- NUEVO MÉTODO ---
-  // Este método simplemente devuelve todos los usuarios.
-  // La contraseña se elimina automáticamente gracias a la transformación del schema.
   async findAll(): Promise<Usuario[]> {
     return this.usuarioModel.find().exec();
   }
@@ -48,7 +45,6 @@ export class UsuariosService {
   }
 
   async update(id: string, updateUsuarioDto: UpdateUsuarioDto): Promise<Usuario> {
-    // Si se está actualizando la contraseña, la encriptamos
     if (updateUsuarioDto.contrasena) {
       const salt = await bcrypt.genSalt(10);
       updateUsuarioDto.contrasena = await bcrypt.hash(updateUsuarioDto.contrasena, salt);
@@ -68,25 +64,21 @@ export class UsuariosService {
     }
     return { message: `Usuario con ID "${id}" eliminado exitosamente.` };
   }
-  async findAvailableShelterUsers(): Promise<Usuario[]> {
-    // 1. Obtener los IDs de todos los propietarios que ya tienen un refugio
-    const assignedOwners = await this.refugioModel.find().distinct('propietario');
 
-    // 2. Buscar usuarios con rol 'REFUGIO' cuyo ID no esté en la lista de asignados
+  async findAvailableShelterUsers(): Promise<Usuario[]> {
+    const assignedOwners = await this.refugioModel.find().distinct('propietario');
     const availableUsers = await this.usuarioModel.find({
       rol: 'REFUGIO',
       _id: { $nin: assignedOwners }
     });
-
     return availableUsers;
   }
+
   async updateProfile(userId: string, updateUsuarioDto: UpdateUsuarioDto): Promise<Usuario> {
-    // Si se está actualizando la contraseña, la encriptamos
     if (updateUsuarioDto.contrasena) {
       const salt = await bcrypt.genSalt(10);
       updateUsuarioDto.contrasena = await bcrypt.hash(updateUsuarioDto.contrasena, salt);
     } else {
-      // Nos aseguramos de no borrar la contraseña si no se envía una nueva
       delete updateUsuarioDto.contrasena;
     }
     
@@ -97,4 +89,21 @@ export class UsuariosService {
     return usuarioActualizado;
   }
 
+  // ── FCM TOKEN ──────────────────────────────────────────────────────────
+  async saveFcmToken(userId: string, token: string): Promise<{ message: string }> {
+    await this.usuarioModel.findByIdAndUpdate(
+      userId,
+      { $addToSet: { fcmTokens: token } }, // $addToSet evita duplicados
+      { new: true },
+    );
+    return { message: 'FCM token guardado correctamente.' };
+  }
+
+  async removeFcmToken(userId: string, token: string): Promise<{ message: string }> {
+    await this.usuarioModel.findByIdAndUpdate(
+      userId,
+      { $pull: { fcmTokens: token } },
+    );
+    return { message: 'FCM token eliminado correctamente.' };
+  }
 }

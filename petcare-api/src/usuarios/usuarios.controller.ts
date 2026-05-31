@@ -6,6 +6,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+
 @ApiTags('usuarios')
 @Controller('usuarios')
 export class UsuariosController {
@@ -28,7 +29,6 @@ export class UsuariosController {
     return this.usuariosService.create(createUsuarioDto);
   }
 
-  // ── GET /usuarios/mi-perfil ── usuario logueado lee su propio perfil ──
   @Get('mi-perfil')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
@@ -61,6 +61,23 @@ export class UsuariosController {
   @ApiOperation({ summary: 'Actualizar el perfil del usuario logueado' })
   updateProfile(@Req() req, @Body() updateUsuarioDto: UpdateUsuarioDto) {
     return this.usuariosService.updateProfile(req.user.id, updateUsuarioDto);
+  }
+
+  // ── FCM TOKEN ───────────────────────────────────────────────────────────
+  @Post('fcm-token')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Guardar FCM token del dispositivo del usuario logueado' })
+  saveFcmToken(@Req() req, @Body('token') token: string) {
+    return this.usuariosService.saveFcmToken(req.user.id, token);
+  }
+
+  @Delete('fcm-token')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar FCM token al cerrar sesión' })
+  removeFcmToken(@Req() req, @Body('token') token: string) {
+    return this.usuariosService.removeFcmToken(req.user.id, token);
   }
 
   @Patch(':id')
