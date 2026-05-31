@@ -124,6 +124,13 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Padding inferior del sistema (barra de gestos del teléfono)
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    // Altura del nav flotante: 16 margen + ~60 barra
+    const navBarHeight = 76.0;
+    // Espacio total debajo de los botones
+    final bottomPad = bottomInset + navBarHeight;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Descubrir Mascotas'),
@@ -174,7 +181,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
               final pets = snapshot.data!;
 
-              // ── Botones — usa Consumer para leer isFavorite reactivamente ──
               Widget actionButtons({
                 bool showSkip = true,
                 required Pet currentPet,
@@ -183,50 +189,44 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                 return Consumer<FavoritesProvider>(
                   builder: (context, favProvider, _) {
                     final isFav = favProvider.isFavorite(currentPet.id);
-                    return SafeArea(
-                      top: false,
-                      child: Padding(
-                        // ↑ más espacio arriba para que los botones bajen
-                        padding:
-                            const EdgeInsets.only(bottom: 96, top: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            // Botón SKIP (flecha adelante)
-                            if (showSkip)
-                              _ActionButton(
-                                icon: Icons.arrow_forward_rounded,
-                                color: Colors.orange,
-                                onPressed: () => _swiperController
-                                    .swipe(CardSwiperDirection.left),
-                              ),
-                            // Botón INFO
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        // Pega los botones justo encima del nav flotante
+                        bottom: bottomPad,
+                        top: 12,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          if (showSkip)
                             _ActionButton(
-                              icon: Icons.article_outlined,
-                              color: Colors.blueAccent,
-                              size: 28,
-                              onPressed: onInfo,
+                              icon: Icons.arrow_forward_rounded,
+                              color: Colors.orange,
+                              onPressed: () => _swiperController
+                                  .swipe(CardSwiperDirection.left),
                             ),
-                            // Botón FAVORITO — outline si no es fav, relleno si sí
-                            _ActionButton(
-                              icon: isFav
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isFav
-                                  ? AppColors.primary
-                                  : Colors.grey,
-                              onPressed: () =>
-                                  _onFavorite(currentPet, favProvider),
-                            ),
-                          ],
-                        ),
+                          _ActionButton(
+                            icon: Icons.article_outlined,
+                            color: Colors.blueAccent,
+                            size: 28,
+                            onPressed: onInfo,
+                          ),
+                          _ActionButton(
+                            icon: isFav
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color:
+                                isFav ? AppColors.primary : Colors.grey,
+                            onPressed: () =>
+                                _onFavorite(currentPet, favProvider),
+                          ),
+                        ],
                       ),
                     );
                   },
                 );
               }
 
-              // ── Caso: una sola mascota ────────────────────────────
               if (pets.length == 1) {
                 final pet = pets[0];
                 return Column(
@@ -248,7 +248,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                 );
               }
 
-              // ── Caso: múltiples mascotas ───────────────────────────
               return Column(
                 children: [
                   Expanded(
@@ -279,7 +278,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
             },
           ),
 
-          // ── Corazón flotante animado ──────────────────────────────
           if (_showHeartOverlay)
             Center(
               child: AnimatedBuilder(
@@ -299,7 +297,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
               ),
             ),
 
-          // ── Confetti ─────────────────────────────────────────────
           ConfettiWidget(
             confettiController: _confettiController,
             blastDirectionality: BlastDirectionality.explosive,
@@ -309,7 +306,8 @@ class _DiscoverScreenState extends State<DiscoverScreen>
               final path = Path();
               path.moveTo(size.width / 2, size.height / 5);
               path.cubicTo(size.width / 2, size.height / 5,
-                  size.width / 10, size.height / 2.5, size.width / 2, size.height);
+                  size.width / 10, size.height / 2.5,
+                  size.width / 2, size.height);
               path.cubicTo(size.width / 2, size.height,
                   size.width - (size.width / 10), size.height / 2.5,
                   size.width / 2, size.height / 5);
@@ -322,7 +320,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   }
 }
 
-// ── Botón de acción circular ──────────────────────────────────────────────
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -361,7 +358,6 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-// ── Toast superior ──────────────────────────────────────────────────────
 class _TopToast extends StatefulWidget {
   final String message;
   final bool isAdd;
@@ -410,7 +406,8 @@ class _TopToastState extends State<_TopToast>
             borderRadius: BorderRadius.circular(16),
             color: widget.isAdd ? AppColors.primary : Colors.blueGrey,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
