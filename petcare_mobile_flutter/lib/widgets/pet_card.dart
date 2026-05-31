@@ -5,15 +5,8 @@ import 'package:petcare_mobile/utils/app_colors.dart';
 
 class PetCard extends StatelessWidget {
   final Pet pet;
-  final bool isFavorite;
-  final VoidCallback? onFavoriteTap;
 
-  const PetCard({
-    super.key,
-    required this.pet,
-    this.isFavorite = false,
-    this.onFavoriteTap,
-  });
+  const PetCard({super.key, required this.pet});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +20,7 @@ class PetCard extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Foto ──────────────────────────────────────────────
+          // ── Foto ──────────────────────────────────────────────────
           fotoUrl != null
               ? Image.network(
                   fotoUrl,
@@ -36,7 +29,7 @@ class PetCard extends StatelessWidget {
                 )
               : _photoFallback(),
 
-          // ── Gradiente inferior ────────────────────────────────
+          // ── Gradiente inferior ────────────────────────────────────
           Positioned(
             bottom: 0,
             left: 0,
@@ -56,7 +49,7 @@ class PetCard extends StatelessWidget {
             ),
           ),
 
-          // ── Chips superiores (especie + tamaño) ───────────────
+          // ── Chips superiores (especie + tamaño) ───────────────────
           Positioned(
             top: 16,
             left: 16,
@@ -77,38 +70,7 @@ class PetCard extends StatelessWidget {
             ),
           ),
 
-          // ── Botón favorito ────────────────────────────────────
-          Positioned(
-            top: 12,
-            right: 12,
-            child: GestureDetector(
-              onTap: onFavoriteTap,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isFavorite
-                      ? AppColors.primary.withOpacity(0.9)
-                      : Colors.white.withOpacity(0.85),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.white : AppColors.primary,
-                  size: 22,
-                ),
-              ),
-            ),
-          ),
-
-          // ── Info inferior ─────────────────────────────────────
+          // ── Info inferior ─────────────────────────────────────────
           Positioned(
             bottom: 20,
             left: 20,
@@ -116,7 +78,6 @@ class PetCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nombre
                 Text(
                   pet.nombre,
                   style: GoogleFonts.poppins(
@@ -129,7 +90,6 @@ class PetCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
-                // Raza + edad + sexo
                 Row(
                   children: [
                     Expanded(
@@ -145,7 +105,8 @@ class PetCard extends StatelessWidget {
                       ),
                     ),
                     _PillBadge(
-                      label: '${pet.edad} ${pet.edad == 1 ? "año" : "años"}',
+                      label:
+                          '${pet.edad} ${pet.edad == 1 ? "año" : "años"}',
                     ),
                     const SizedBox(width: 6),
                     _PillBadge(label: pet.sexo),
@@ -169,7 +130,7 @@ class PetCard extends StatelessWidget {
   }
 }
 
-// ── Chip de info superior ────────────────────────────────────────────
+// ── Chip de info superior ─────────────────────────────────────────────────
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -209,7 +170,7 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-// ── Badge de pill inferior ───────────────────────────────────────────
+// ── Badge pill inferior ───────────────────────────────────────────────────
 class _PillBadge extends StatelessWidget {
   final String label;
   const _PillBadge({required this.label});
