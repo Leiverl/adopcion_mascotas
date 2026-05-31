@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,6 +9,7 @@ import 'package:petcare_mobile/providers/favorites_provider.dart';
 import 'package:petcare_mobile/providers/theme_provider.dart';
 import 'package:petcare_mobile/providers/user_provider.dart';
 import 'package:petcare_mobile/screens/auth_wrapper.dart';
+import 'package:petcare_mobile/services/fcm_service.dart';
 import 'package:petcare_mobile/utils/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:petcare_mobile/providers/interacciones_provider.dart';
@@ -16,6 +18,7 @@ import 'package:petcare_mobile/providers/notificaciones_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();          // ← inicializa Firebase
   await initializeDateFormatting('es_ES', null);
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -43,7 +46,6 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Construye el ThemeData a partir de la paleta y el brillo
   ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     final textTheme = GoogleFonts.poppinsTextTheme(
