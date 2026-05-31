@@ -22,7 +22,8 @@ class FavoritesProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavorite(Pet pet) async {
+  /// Retorna el mensaje a mostrar en el toast
+  Future<String> toggleFavorite(Pet pet) async {
     final isFav = isFavorite(pet.id);
     // Optimistic update
     if (isFav) {
@@ -35,8 +36,10 @@ class FavoritesProvider with ChangeNotifier {
     try {
       if (isFav) {
         await _favoritesService.removeFavorite(pet.id);
+        return '¡Eliminado de favoritos!';
       } else {
         await _favoritesService.addFavorite(pet.id);
+        return '¡Agregado a favoritos!';
       }
     } catch (e) {
       // Revertir si falla
@@ -47,6 +50,7 @@ class FavoritesProvider with ChangeNotifier {
       }
       notifyListeners();
       debugPrint('FavoritesProvider toggleFavorite error: $e');
+      return 'Error al actualizar favoritos';
     }
   }
 

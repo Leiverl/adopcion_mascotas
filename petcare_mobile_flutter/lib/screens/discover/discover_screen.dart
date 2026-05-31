@@ -118,17 +118,17 @@ class _DiscoverScreenState extends State<DiscoverScreen>
       _heartAnimController.forward(from: 0);
       _confettiController.play();
     }
-    final message = await provider.toggleFavorite(pet);
-    if (mounted) _showTopToast(message, isAdd: isAdding);
+    // toggleFavorite ahora retorna String con el mensaje
+    final String message = await provider.toggleFavorite(pet);
+    if (mounted) {
+      _showTopToast(message, isAdd: isAdding);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Padding inferior del sistema (barra de gestos del teléfono)
     final bottomInset = MediaQuery.of(context).padding.bottom;
-    // Altura del nav flotante: 16 margen + ~60 barra
     const navBarHeight = 76.0;
-    // Espacio total debajo de los botones
     final bottomPad = bottomInset + navBarHeight;
 
     return Scaffold(
@@ -191,7 +191,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                     final isFav = favProvider.isFavorite(currentPet.id);
                     return Padding(
                       padding: EdgeInsets.only(
-                        // Pega los botones justo encima del nav flotante
                         bottom: bottomPad,
                         top: 12,
                       ),
