@@ -21,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Cargar perfil al abrir la pantalla
+    // Intentar cargar perfil desde API (enriquece con datos frescos)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserProvider>(context, listen: false).fetchProfile();
     });
@@ -57,13 +57,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: Consumer2<UserProvider, FavoritesProvider>(
         builder: (context, userProvider, favProvider, _) {
-          final profile = userProvider.profile;
+          final apiProfile = userProvider.profile;
           final favsCount = favProvider.favoritePets.length;
+
+          // Prioridad: datos de la API -> datos del JWT -> fallback
+          final authProvider =
+              Provider.of<AuthProvider>(context, listen: false);
+          final nombre = apiProfile?.nombre ??
+              authProvider.userNombre ??
+              'Usuario';
+          final correo = apiProfile?.correo ??
+              authProvider.userCorreo ??
+              '';
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
             children: [
-              // ── Header ──────────────────────────────────────────────
+              // ── Header ─────────────────────────────────────────────
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -82,7 +92,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Row(
                       children: [
-                        // Ícono genérico (sin avatar)
                         Container(
                           width: 56,
                           height: 56,
@@ -95,33 +104,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: userProvider.isLoading
-                              ? const _LoadingName()
-                              : Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      profile?.nombre ?? 'Usuario',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.textDark),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      profile?.correo ?? '',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 12,
-                                          color: AppColors.textMedium),
-                                    ),
-                                  ],
-                                ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nombre,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textDark),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                correo,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: AppColors.textMedium),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    // ── Stats ───────────────────────────────────────
                     Row(
                       children: [
                         _StatChip(
@@ -137,7 +142,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 20),
 
-              // ── Mi actividad ───────────────────────────────────────
               Text('Mi actividad',
                   style: GoogleFonts.poppins(
                       fontSize: 13,
@@ -164,7 +168,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 20),
 
-              // ── Cuenta ─────────────────────────────────────────────
               Text('Cuenta',
                   style: GoogleFonts.poppins(
                       fontSize: 13,
@@ -178,7 +181,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 subtitle: 'Salir de tu cuenta',
                 danger: true,
                 onTap: () {
-                  // Limpiar perfil cacheado al cerrar sesión
                   Provider.of<UserProvider>(context, listen: false).clear();
                   Provider.of<AuthProvider>(context, listen: false).logout();
                 },
@@ -191,31 +193,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// ── Shimmer de carga ────────────────────────────────────────────────────
-class _LoadingName extends StatelessWidget {
-  const _LoadingName();
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-            width: 120, height: 14,
-            decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(8))),
-        const SizedBox(height: 6),
-        Container(
-            width: 180, height: 11,
-            decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(8))),
-      ],
-    );
-  }
-}
-
-// ── Chip de estadística ─────────────────────────────────────────────────
 class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -251,7 +228,6 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// ── Tile de menú ─────────────────────────────────────────────────────────
 class _MenuTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;

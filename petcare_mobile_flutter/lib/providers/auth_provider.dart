@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jwt_decoder/jwt_decoder.dart'; // <-- IMPORTAR
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:petcare_mobile/api/auth_service.dart';
 
 enum AuthStatus { uninitialized, authenticated, unauthenticated, authenticating }
@@ -10,15 +10,20 @@ class AuthProvider with ChangeNotifier {
   String? _token;
 
   AuthStatus get status => _status;
-  
-  // --- NUEVO GETTER PARA OBTENER EL USER ID ---
-  String? get userId {
+
+  Map<String, dynamic> get _decodedToken {
     if (_token != null) {
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(_token!);
-      return decodedToken['id']; // Asumimos que el payload del token tiene el campo 'id'
+      try {
+        return JwtDecoder.decode(_token!);
+      } catch (_) {}
     }
-    return null;
+    return {};
   }
+
+  String? get userId => _decodedToken['id']?.toString();
+  String? get userNombre => _decodedToken['nombre']?.toString();
+  String? get userCorreo => _decodedToken['correo']?.toString();
+  String? get userRol => _decodedToken['rol']?.toString();
 
   AuthProvider() {
     _tryAutoLogin();
@@ -39,12 +44,12 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _authService.login(correo, contrasena);
-      await _tryAutoLogin(); // Reutilizamos para cargar el token
+      await _tryAutoLogin();
       return true;
     } catch (e) {
       _status = AuthStatus.unauthenticated;
       notifyListeners();
-      print(e);
+      debugPrint('AuthProvider login error: $e');
       return false;
     }
   }
@@ -64,7 +69,7 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _status = AuthStatus.unauthenticated;
       notifyListeners();
-      print(e);
+      debugPrint('AuthProvider register error: $e');
       return false;
     }
   }
