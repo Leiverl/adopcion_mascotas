@@ -8,7 +8,6 @@ class FavoritesService {
   final String? _apiUrl = dotenv.env['API_URL'];
   final _storage = const FlutterSecureStorage();
 
-  // Obtener la lista de mascotas favoritas
   Future<List<Pet>> getFavorites() async {
     final token = await _storage.read(key: 'accessToken');
     final url = Uri.parse('$_apiUrl/favoritos/mis-favoritos');
@@ -19,13 +18,17 @@ class FavoritesService {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Pet.fromJson(json)).toList();
+      // La API devuelve objetos Favorito: { _id, usuario, mascota: { ... } }
+      // Hay que extraer el campo 'mascota' de cada elemento
+      return data
+          .where((item) => item['mascota'] != null)
+          .map((item) => Pet.fromJson(item['mascota']))
+          .toList();
     } else {
       throw Exception('Error al cargar los favoritos');
     }
   }
 
-  // Añadir una mascota a favoritos
   Future<void> addFavorite(String petId) async {
     final token = await _storage.read(key: 'accessToken');
     final url = Uri.parse('$_apiUrl/favoritos');
@@ -40,7 +43,6 @@ class FavoritesService {
     );
   }
 
-  // Eliminar una mascota de favoritos
   Future<void> removeFavorite(String petId) async {
     final token = await _storage.read(key: 'accessToken');
     final url = Uri.parse('$_apiUrl/favoritos/$petId');
