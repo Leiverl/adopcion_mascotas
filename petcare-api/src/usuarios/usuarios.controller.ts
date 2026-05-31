@@ -7,8 +7,6 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 @ApiTags('usuarios')
-//@ApiBearerAuth()
-//@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
@@ -21,6 +19,7 @@ export class UsuariosController {
   findAvailableShelterUsers() {
     return this.usuariosService.findAvailableShelterUsers();
   }
+
   @Post('registro')
   @ApiOperation({ summary: 'Registrar un nuevo usuario' })
   @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente.'})
@@ -29,16 +28,15 @@ export class UsuariosController {
     return this.usuariosService.create(createUsuarioDto);
   }
 
-  // --- NUEVA RUTA PROTEGIDA ---
-  //@Get() // La ruta final será GET /api/v1/usuarios
-  //@ApiOperation({ summary: 'Obtener la lista de todos los usuarios (Ruta Protegida)' })
-  //@ApiResponse({ status: 200, description: 'Lista de usuarios.'})
-  //@ApiResponse({ status: 401, description: 'No autorizado.'})
-  //@ApiBearerAuth() // Esto le dice a Swagger que esta ruta necesita un token
-  //@UseGuards(AuthGuard('jwt')) // ¡Esta es la línea que protege la ruta!
-  //findAll() {
-    //return this.usuariosService.findAll();
-  //}
+  // ── GET /usuarios/mi-perfil ── usuario logueado lee su propio perfil ──
+  @Get('mi-perfil')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener el perfil del usuario logueado' })
+  getMyProfile(@Req() req) {
+    return this.usuariosService.findOne(req.user.id);
+  }
+
   @Get()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
@@ -48,7 +46,6 @@ export class UsuariosController {
     return this.usuariosService.findAll();
   }
 
-  // --- NUEVOS ENDPOINTS ---
   @Get(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
@@ -59,13 +56,13 @@ export class UsuariosController {
   }
 
   @Patch('mi-perfil')
-  @UseGuards(AuthGuard('jwt')) // Protegido para cualquier usuario logueado
+  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar el perfil del usuario logueado' })
   updateProfile(@Req() req, @Body() updateUsuarioDto: UpdateUsuarioDto) {
     return this.usuariosService.updateProfile(req.user.id, updateUsuarioDto);
   }
-  
+
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
