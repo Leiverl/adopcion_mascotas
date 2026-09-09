@@ -224,7 +224,7 @@ Consulta el **[MANUAL_USUARIO.md](MANUAL_USUARIO.md)** para una guía paso a pas
 
 ## 📄 Licencia
 
-Este proyecto está bajo la licencia **MIT**. Ver [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la licencia **MIT**. Ver [LICENSE](LICENSE) [Leiver](https://github.com/Leiverl).
 
 ---
 
